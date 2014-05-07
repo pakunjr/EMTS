@@ -1,0 +1,385 @@
+/*! normalize.css v3.0.0 | MIT License | git.io/normalize */html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0}article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,summary{display:block}audio,canvas,progress,video{display:inline-block;vertical-align:baseline}audio:not([controls]){display:none;height:0}[hidden],template{display:none}a{background:transparent}a:active,a:hover{outline:0}abbr[title]{border-bottom:1px dotted}b,strong{font-weight:bold}dfn{font-style:italic}h1{font-size:2em;margin:.67em 0}mark{background:#ff0;color:#000}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sup{top:-0.5em}sub{bottom:-0.25em}img{border:0}svg:not(:root){overflow:hidden}figure{margin:1em 40px}hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}pre{overflow:auto}code,kbd,pre,samp{font-family:monospace,monospace;font-size:1em}button,input,optgroup,select,textarea{color:inherit;font:inherit;margin:0}button{overflow:visible}button,select{text-transform:none}button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}button[disabled],html input[disabled]{cursor:default}button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}input{line-height:normal}input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{height:auto}input[type="search"]{-webkit-appearance:textfield;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;box-sizing:content-box}input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-decoration{-webkit-appearance:none}fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}legend{border:0;padding:0}textarea{overflow:auto}optgroup{font-weight:bold}table{border-collapse:collapse;border-spacing:0}td,th{padding:0}
+
+/**
+ * ============================================================================
+ * TABLE OF CONTENTS
+ * ============================================================================
+ *
+ * 1. Main Tags and Classes
+ * 2. Main Parts
+ * 3. jQuery UI
+ */
+
+/* Block 1. Main Tags and Classes */
+
+html,
+body {
+    display: block;
+    margin: 0px;
+    padding: 0px;
+    min-width: 1024px;
+    background: url('../img/textured_noisedgreen.jpg') center center repeat scroll #024301;
+    font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+    font-size: 12pt;
+}
+a {
+    text-decoration: none;
+    color: #000399;
+}
+a:hover {
+    text-decoration: underline;
+}
+table {
+    background: #fff;
+}
+table th,
+table td {
+    margin: 0px;
+    padding: 5px 10px;
+    border: 1px solid #000;
+}
+fieldset {
+    margin: 0px 0px 10px 0px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #cccccc;
+    background: #fff;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.15);
+}
+fieldset legend {
+    display: inline-block;
+    margin: 0px;
+    padding: 5px 10px;
+    border-top-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border: 1px solid #cccccc;
+    background: #fff;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.25);
+    font-weight: bold;
+    font-size: 10.5pt;
+}
+fieldset fieldset {
+    display: inline-block;
+    margin: 2px;
+}
+label {
+    display: inline-block;
+    max-width: 150px;
+    padding: 5px 10px 5px 5px;
+    font-size: 11.5pt;
+    vertical-align: middle;
+}
+input[type="text"],
+input[type="password"],
+select,
+textarea {
+    display: inline-block;
+    max-width: 150px;
+    margin: 0px 0px 2px 0px;
+    padding: 5px 10px;
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border: 1px solid #cccccc;
+    background: #f2f2f2;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.25);
+    vertical-align: middle;
+}
+select {
+    border-radius: 4px;
+    cursor: pointer;
+}
+textarea {
+    resize: vertical;
+}
+input[type="text"]:hover,
+input[type="password"]:hover,
+select:hover,
+textarea:hover {
+    border-color: #cc9600;
+}
+input[type="text"]:focus,
+input[type="password"]:focus,
+select:focus,
+textarea:focus {
+    border-color: #005533;
+    background: #fff;
+}
+input[type="button"],
+a.button,
+input[type="reset"],
+input[type="submit"] {
+    display: inline-block;
+    margin: 0px 2px 2px 0px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid #d9d9d9;
+    background: #f2f2f2;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.25);
+    font-weight: normal;
+    font-size: 10pt;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+    color: #000;
+}
+input[type="button"]:hover,
+a.button:hover {
+    border-color: #004f80;
+    background: #006eb3;
+    color: #fff;
+}
+input[type="reset"]:hover {
+    border-color: #990000;
+    background: #cc0000;
+    color: #fff;
+}
+input[type="submit"]:hover {
+    border-color: #004d2e;
+    background: #00804d;
+    color: #fff;
+}
+input[type="button"]:active,
+input[type="reset"]:active,
+input[type="submit"]:active {
+    box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.45) inset;
+}
+
+.logo-emts-25x25 {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    background: url('../img/logo_EMTS_25x25.png') center center no-repeat scroll transparent;
+}
+.logo-emts-60x60 {
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    background: url('../img/logo_EMTS_60x60.png') center center no-repeat scroll transparent;
+}
+.icon-insignia-70x29 {
+    display: inline-block;
+    width: 70px;
+    height: 29px;
+    background: url('../img/insignia_70x29.png') center center no-repeat scroll transparent;
+}
+.icon-home,
+.icon-report,
+.icon-monitor,
+.icon-gear,
+.icon-chair,
+.icon-briefcase,
+.icon-human,
+.icon-add,
+.icon-addHuman,
+.icon-edit,
+.icon-view {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin: 0px 10px 0px 0px;
+    padding: 0px;
+    background: center center no-repeat scroll transparent;
+}
+.icon-home {
+    background-image: url('../img/icon_home.png');
+}
+.icon-report {
+    background-image: url('../img/icon_report.png');
+}
+.icon-monitor {
+    background-image: url('../img/icon_monitor.png');
+}
+.icon-gear {
+    background-image: url('../img/icon_gear.png');
+}
+.icon-chair {
+    background-image: url('../img/icon_chair.png');
+}
+.icon-briefcase {
+    background-image: url('../img/icon_briefcase.png');
+}
+.icon-human {
+    background-image: url('../img/icon_human.png');
+}
+.icon-add {
+    background-image: url('../img/icon_add.png');
+}
+.icon-addHuman {
+    background-image: url('../img/icon_addHuman.png');
+}
+.icon-edit {
+    background-image: url('../img/icon_edit.png');
+}
+.icon-view {
+    background-image: url('../img/icon_view.png');
+}
+.error {
+    display: inline-block;
+    font-size: 35pt;
+    font-weight: bold;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.15);
+    color: #ff0000;
+}
+.msg-error {
+    display: block;
+    width: 320px;
+    margin: 0px;
+    padding: 7px 10px;
+    position: fixed;
+    bottom: 50px;
+    left: 2px;
+    z-index: 1001;
+    border-top-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border: 1px solid #4d0f0f;
+    background: #801a1a;
+    box-shadow:
+        -2px -2px 0px rgba(255, 255, 255, 0.35),
+        2px 2px 0px rgba(0, 0, 0, 0.5);
+    font-size: 11pt;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.25);
+    color: #fff;
+}
+.msg-error:before,
+.msg-error:after {
+    content: "";
+    display: block;
+    width: 0px;
+    height: 0px;
+    position: fixed;
+    bottom: 65px;
+    left: 343px;
+    z-index: 1001;
+    border-right: 0px;
+}
+.msg-error:before {
+    border-left: 16px solid #4d0f0f;
+    border-top: 16px solid transparent;
+    border-bottom: 16px solid transparent;
+}
+.msg-error:after {
+    bottom: 67px;
+    border-left: 14px solid #801a1a;
+    border-top: 14px solid transparent;
+    border-bottom: 14px solid transparent;
+}
+.msg-error-direct {
+    display: block;
+    max-width: 320px;
+    padding: 5px 10px;
+    position: absolute;
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border: 1px solid transparent;
+    background-color: #a60000;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.25);
+    font-size: 10pt;
+    color: #fff;
+    cursor: pointer;
+}
+.msg-error-direct:before {
+    content: '';
+    display: block;
+    width: 0px;
+    height: 0px;
+    margin-top: -11px;
+    position:absolute;
+    border-top: 0px;
+    border-bottom: 5px solid #a60000;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+}
+.module-label {
+    display: block;
+    margin: 0px 0px 10px 0px;
+    padding: 5px 10px 5px 0px;
+    border: 1px solid transparent;
+    border-bottom-color: #cccccc;
+    font-size: 15pt;
+    font-weight: bold;
+}
+.fields-column {
+    display: inline-block;
+    margin: 2px 2px 0px 0px;
+    text-align: right;
+    vertical-align: top;
+}
+.buttons-column {
+    display: inline-block;
+    margin: 0px 5px 0px 0px;
+    text-align: left;
+}
+.buttons-row {
+    display: block;
+    text-align: left;
+}
+.select-alt {
+    display: inline-block;
+    margin: 0px 0px 1px 0px;
+    padding: 0px;
+    overflow: hidden;
+    list-style-type: none;
+    border-radius: 4px;
+    background: #e5e5e5;
+    font-size: 0pt;
+    vertical-align: middle;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+.select-alt li {
+    display: inline-block;
+    margin: 0px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    font-size: 12pt;
+    cursor: pointer;
+    color: #4d4d4d;
+}
+.select-alt .selected {
+    border: 1px solid #0f661b;
+    background: #1a8027;
+    color: #fff;
+}
+
+/* Block 2. Main Parts */
+/**
+ * Please do the styling of the main parts such as
+ * the header, body, and footer on the template
+ * directory.
+ * Thank you.
+ */
+
+
+/* Block 3. jQuery UI */
+
+.date-picker {
+    border-radius: 4px;
+    cursor: pointer;
+}
+.ui-datepicker {
+    padding: 5px 10px;
+    border-radius: 0px;
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border: 1px solid #bfbfbf;
+    background: #e5e5e5;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.25);
+    font-size: 10pt;
+}
+.ui-datepicker select {
+    color: #000;
+}
+.ui-datepicker-header {
+    border: 1px solid #3d9949;
+    background: #47b356;
+}
+.ui-datepicker .ui-state-default {
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+.ui-datepicker .ui-state-default:active {
+    box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.15) inset;
+}
