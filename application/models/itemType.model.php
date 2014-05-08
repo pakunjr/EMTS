@@ -1,13 +1,9 @@
 <?php
 
-class package_model {
+class itemType_model {
 
-    private $package_id;
-    private $package_name;
-    private $package_serial_no;
-    private $package_description;
-    private $package_items;
-    private $date_of_purchase;
+    private $id;
+    private $label;
 
     private $list;
 
@@ -20,23 +16,20 @@ class package_model {
          */
         $arrayData = array();
         $result = $dbController->query("
-                SELECT package_id
-                    , package_name
-                    , package_serial_no
-                FROM tbl_packages
+                SELECT * FROM lst_item_type
             ");
         while ( $row = $result->fetch_assoc() ) {
-            $arrayData[$row['package_name']. '( '. $row['package_serial_no']. ' )'] = $row['package_id'];
+            $arrayData[$row['label']] = $row['id'];
         }
         $this->list = $arrayData;
-    } //End function __construct
+    } //End class __construct
 
     public function getData ($data) {
-        return $this->$data;
+        return $this->$getData;
     } //End function getData
 
     public function setData ($data, $value) {
         $this->$data = $value;
     } //End function setData
 
-} //End class package_model
+} //End class itemType_model

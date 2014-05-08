@@ -298,7 +298,7 @@ input[type="submit"]:active {
 }
 .fields-column {
     display: inline-block;
-    margin: 2px 2px 0px 0px;
+    margin: 2px 8px 0px 0px;
     text-align: right;
     vertical-align: top;
 }

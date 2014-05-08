@@ -1,6 +1,6 @@
 <?php
 
-class item {
+class item_model {
 
     private $item_id;
     private $item_serial_no;

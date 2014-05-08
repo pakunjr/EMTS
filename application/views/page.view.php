@@ -24,9 +24,92 @@ class page_view {
                 break; //End module home
 
             case 'item':
+                $loginModel = new login_model();
+                if ( !$loginModel->getData('login_status') )
+                    $this->authorizationError();
+
+                $formItemModel = new item_model();
+                $formItemView = new item_view($formItemModel);
+
+                switch ( $this->model->getData('display') ) {
+                    case 'search_item':
+                        switch ( $this->model->getData('action') ) {
+                            case 'search':
+                                break; //End action search
+
+                            default:
+                                $this->getHeader();
+                                $formItemView->itemForm('search_item');
+                                $this->getFooter();
+                        }
+                        break; //End display search_item
+
+                    case 'new_item':
+                        switch ( $this->model->getData('action') ) {
+                            case 'save':
+                                //Save data into the database
+                                break; //End action save
+
+                            default:
+                                $this->getHeader();
+                                $formItemView->itemForm('new_item');
+                                $this->getFooter();
+                        }
+                        break; //End display new_item
+
+                    case 'view_item':
+                        switch ( $this->model->getData('action') ) {
+                            case 'view':
+                                break; //End action view
+
+                            default:
+                                $this->getHeader();
+                                $formItemView->itemForm('view_item');
+                                $this->getFooter();
+                        }
+                        break; //End display view_item
+
+                    case 'update_item':
+                        switch ( $this->model->getData('action') ) {
+                            case 'update':
+                                break; //End action update
+
+                            default:
+                                $this->getHeader();
+                                $formItemView->itemForm('update_item');
+                                $this->getFooter();
+                        }
+                        break; //End display update_item
+
+                    case 'archive_item':
+                        switch ( $this->model->getData('action') ) {
+                            case 'archive':
+                                break; //End action archive
+
+                            default:
+                                $this->getHeader();
+                                $formItemView->itemForm('archive_item');
+                                $this->getFooter();
+                        }
+                        break; //End display archive_item
+
+                    default:
+                        $this->notFoundError();
+                }
                 break; //End module item
 
+            case 'package':
+                $loginModel = new login_model();
+                if ( !$loginModel->getData('login_status') ) {
+                    $this->authorizationError();
+                }
+                break; //End module package
+
             case 'person':
+                $loginModel = new login_model();
+                if ( !$loginModel->getData('login_status') ) {
+                    $this->authorizationError();
+                }
                 break; //End module person
 
             case 'account':
@@ -89,6 +172,13 @@ class page_view {
         if ( file_exists($error_file) ) require_once($error_file);
         $this->getFooter();
     } //End function notFoundError
+
+    public function authorizationError () {
+        $this->getHeader();
+        echo '<div style="font-size: 12pt; color: #ff0000;">Error: You are not authorized to access this page.</div>';
+        $this->getFooter();
+        exit();
+    } //End function authorizationError
 
     public function customError ($customMessage='You have encountered an unidentified error.') {
         $this->getHeader();
