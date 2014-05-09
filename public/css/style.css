@@ -8,6 +8,7 @@
  * 1. Main Tags and Classes
  * 2. Main Parts
  * 3. jQuery UI
+ * 4. Search Forms
  */
 
 /* Block 1. Main Tags and Classes */
@@ -18,7 +19,8 @@ body {
     margin: 0px;
     padding: 0px;
     min-width: 1024px;
-    background: url('../img/textured_noisedgreen.jpg') center center repeat scroll #024301;
+    /* background: url('../img/textured_noisedgreen.jpg') center center repeat scroll #024301; */
+    background: #b9b9b9;
     font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
     font-size: 12pt;
 }
@@ -382,4 +384,34 @@ input[type="submit"]:active {
 }
 .ui-datepicker .ui-state-default:active {
     box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.15) inset;
+}
+
+/* Block 4. Search Forms */
+#tmp-search {
+    padding: 10px;
+    position: absolute;
+    z-index: 1000;
+    border-radius: 4px;
+    border: 2px solid #383838;
+    background-color: #fff;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.25);
+}
+.your-query-is {
+    font-size: 10.5pt;
+}
+#tmp-search-results th {
+    font-size: 10.5pt;
+}
+#tmp-search-results td {
+    font-size: 11pt;
+}
+#tmp-search-results tr:nth-child(2n) {
+    background: #e8fff6;
+}
+.search-data {
+    cursor: pointer;
+}
+.search-data:hover,
+#tmp-search-results tr:nth-child(2n):hover {
+    background: #c7fec4;
 }

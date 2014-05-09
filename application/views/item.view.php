@@ -25,15 +25,15 @@ class item_view {
                 break; //End case new_item
 
             case 'view_item':
-                $formOutput = '';
+                $this->getForm('item_view.php');
                 break; //End case view_item
 
             case 'update_item':
-                $formOutput = '';
+                $this->getForm('item_update.php');
                 break; //End case update_item
 
             case 'archive_item':
-                $formOutput = '';
+                //Archive the item, do not delete it.
                 break; //End case archive_item
 
             default:

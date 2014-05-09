@@ -25,7 +25,7 @@ class itemType_model {
     } //End class __construct
 
     public function getData ($data) {
-        return $this->$getData;
+        return $this->$data;
     } //End function getData
 
     public function setData ($data, $value) {

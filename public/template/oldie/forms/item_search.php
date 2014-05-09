@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Display a form.
+ */
 $formModel = new form_model(array(
         'auto_label'    => true
         , 'auto_line_break' => true
@@ -14,9 +17,10 @@ $formOutput = $formView->openForm(array(
     ))
     . $formView->openFieldset(array('legend'=>'Search Item'))
     . '<span class="fields-column">'
-    . $formView->text(array('id'=>'search-item', 'label'=>'Search Item'))
+    . $formView->text(array('id'=>'search-item', 'class'=>'search-item', 'label'=>'Search Item'))
     . '</span>'
     . $formView->closeFieldset()
-    . $formView->closeForm();
+    . $formView->closeForm()
+    . '<script type="text/javascript" src="'. URL_BASE. 'public/js/search.js"></script>';
 
 echo $formOutput;
