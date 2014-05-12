@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Get list of item type.
+ * Get list of itemType.
  */
 $itemTypeModel = new itemType_model();
 $itemTypeList = $itemTypeModel->getData('list');

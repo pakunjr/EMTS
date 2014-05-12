@@ -22,4 +22,48 @@ class item_model {
         $this->$data = $value;
     } //End function setData
 
+    public function create () {
+        $dbModel = new database_model();
+        $dbController = new database_controller($dbModel);
+
+        /**
+         * Check if item already exist.
+         */
+        $existenceResult = $dbController->query("
+                SELECT * FROM tbl_items
+                WHERE
+                    item_serial_no = '$this->item_serial_no'
+                    AND item_model_no = '$this->item_model_no'
+            ");
+
+        if ( $existenceResult->num_rows > 0 ) {
+            echo '<div>Error: Item already exist.</div>';
+            return false;
+        }
+
+        /**
+         * Create item in the database.
+         */
+        $result = $dbController->query("
+                INSERT INTO tbl_items(
+                        item_serial_no
+                        , item_model_no
+                        , item_name
+                        , item_type
+                        , item_description
+                        , date_of_purchase
+                    ) VALUES(
+                        '$this->item_serial_no'
+                        , '$this->item_model_no'
+                        , '$this->item_name'
+                        , '$this->item_type'
+                        , '$this->item_description'
+                        , '$this->date_of_purchase'
+                    )
+            ");
+
+        if ( !$result )
+            echo '<div>Error: Failed to create the new item.</div>';
+    } //End function cretae
+
 } //End class item

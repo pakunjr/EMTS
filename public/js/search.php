@@ -79,6 +79,9 @@ if ( isset($_GET['search'])
             echo '<div style="font-size: 11pt; color: #f00;">Search Error: Invalid search entry.</div>';
     }
 
+    /**
+     * Display HTML Output.
+     */
     $output = '<div class="your-query-is">Your query is <b>"'
         . $_GET['query']
         . '"</b></div>'

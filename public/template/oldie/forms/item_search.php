@@ -17,7 +17,7 @@ $formOutput = $formView->openForm(array(
     ))
     . $formView->openFieldset(array('legend'=>'Search Item'))
     . '<span class="fields-column">'
-    . $formView->text(array('id'=>'search-item', 'class'=>'search-item', 'label'=>'Search Item'))
+    . $formView->text(array('id'=>'search-item', 'class'=>'search-item', 'label'=>'Serial No'))
     . '</span>'
     . $formView->closeFieldset()
     . $formView->closeForm()

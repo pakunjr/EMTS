@@ -35,10 +35,7 @@ var loadTheSearch = function (file, $object) {
                 var $this = $(this)
                     , valuableData = $this.find('.valuable-data').val();
 
-                $object
-                .val($this.find('.search-result-item-name').html() + ' \( '
-                    + $this.find('.search-result-item-serialno').html() + ' | '
-                    + $this.find('.search-result-item-modelno').html() + ' \)');
+                $object.val($this.find('.search-result-item-serialno').html());
 
                 if ( $object.next('.search-result-data').length < 1 ) {
                     $object.after('<input type="hidden" value="'

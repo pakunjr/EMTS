@@ -47,7 +47,25 @@ class page_view {
                     case 'new_item':
                         switch ( $this->model->getData('action') ) {
                             case 'save':
-                                //Save data into the database
+                                if ( !isset($_POST) ) {
+                                    echo '<div>Error: There is no data that is to be save into the database.</div>';
+                                    return false;
+                                }
+
+                                $itemDataArray = array(
+                                        'item_serial_no' => $_POST['serial-no']
+                                        , 'item_model_no' => $_POST['model-no']
+                                        , 'item_name' => $_POST['item-name']
+                                        , 'item_type' => $_POST['item-type']
+                                        , 'item_description'
+                                            => $_POST['item-description']
+                                        , 'date_of_purchase'
+                                            => $_POST['date-of-purchase']
+                                    );
+
+                                $itemModel = new item_model();
+                                $itemController = new item_controller($itemModel);
+                                $itemController->createItem($itemDataArray);
                                 break; //End action save
 
                             default:
