@@ -21,6 +21,7 @@ class login_model {
     private $middlename;
     private $lastname;
     private $suffix;
+    private $email;
 
     public function __construct () {
         $this->login_status = !isset($_SESSION['user']) ? false : true;
@@ -35,6 +36,8 @@ class login_model {
             ? $_SESSION['user']['lastname'] : '';
         $this->suffix = isset($_SESSION['user']['suffix'])
             ? $_SESSION['user']['suffix'] : '';
+        $this->email = isset($_SESSION['user']['email'])
+            ? $_SESSION['user']['email'] : '';
 
         $this->employee_id = isset($_SESSION['user']['employee_id'])
             ? $_SESSION['user']['employee_id'] : '';

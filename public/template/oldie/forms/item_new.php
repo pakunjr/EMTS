@@ -30,12 +30,13 @@ $formOutput = $formView->openForm(array(
     . $formView->textarea(array('id'=>'item-description', 'label'=>'Description'))
     . $formView->text(array('id'=>'date-of-purchase', 'class'=>'date-picker', 'label'=>'Date of Purchase'))
     . '</span><span class="fields-column">'
-    . $formView->text(array('id'=>'item-owner', 'label'=>'Owner'))
-    . $formView->text(array('id'=>'package', 'label'=>'Package'))
+    . $formView->text(array('id'=>'item-owner', 'class'=>'search-item', 'label'=>'Owner'))
+    . $formView->text(array('id'=>'package', 'class'=>'search-package', 'label'=>'Package'))
     . '</span>'
     . $formView->closeFieldset()
     . $formView->submit(array('value'=>'Save', 'auto_line_break'=>false))
     . $formView->reset(array('value'=>'Reset Fields'))
-    . $formView->closeForm();
+    . $formView->closeForm()
+    . '<script type="text/javascript" src="'. URL_BASE. 'public/js/search.js"></script>';
 
 echo $formOutput;

@@ -35,11 +35,7 @@ class item_model {
                     item_serial_no = '$this->item_serial_no'
                     AND item_model_no = '$this->item_model_no'
             ");
-
-        if ( $existenceResult->num_rows > 0 ) {
-            echo '<div>Error: Item already exist.</div>';
-            return false;
-        }
+        if ( $existenceResult->num_rows > 0 ) return false;
 
         /**
          * Create item in the database.
@@ -58,12 +54,13 @@ class item_model {
                         , '$this->item_name'
                         , '$this->item_type'
                         , '$this->item_description'
-                        , '$this->date_of_purchase'
+                        , '$this->item_date_of_purchase'
                     )
             ");
+        
+        if ( !$result ) return false;
 
-        if ( !$result )
-            echo '<div>Error: Failed to create the new item.</div>';
-    } //End function cretae
+        return true;
+    } //End function create
 
 } //End class item

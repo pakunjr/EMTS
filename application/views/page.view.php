@@ -52,20 +52,19 @@ class page_view {
                                     return false;
                                 }
 
-                                $itemDataArray = array(
-                                        'item_serial_no' => $_POST['serial-no']
-                                        , 'item_model_no' => $_POST['model-no']
-                                        , 'item_name' => $_POST['item-name']
-                                        , 'item_type' => $_POST['item-type']
-                                        , 'item_description'
-                                            => $_POST['item-description']
-                                        , 'date_of_purchase'
-                                            => $_POST['date-of-purchase']
-                                    );
-
                                 $itemModel = new item_model();
                                 $itemController = new item_controller($itemModel);
-                                $itemController->createItem($itemDataArray);
+                                $itemCreationResult = $itemController->createItem($_POST);
+
+                                if ( $itemCreationResult ) {
+                                    $this->message('<div>Item has been successfully created.<br />Go <a href="'. URL_BASE. 'item/new_item/">back</a></div>');
+                                } else {
+                                    $this->customError('<div>Item has failed to be created.<br />Possible reasons:<ol>'
+                                        . '<li>Item already exist.</li>'
+                                        . '<li>There is an invalid data.</li>'
+                                        . '<li>There is something wrong with the system.<br /><small style="color: #f00;">Please do notify the system administrators regarding this matter. Thank you.</small></li>'
+                                        . '</ol>Go <a href="'. URL_BASE. 'item/new_item/">back</a></div>');
+                                }
                                 break; //End action save
 
                             default:
@@ -136,8 +135,7 @@ class page_view {
                         switch ( $this->model->getData('action') ) {
                             case 'validate':
                                 $loginModel = new login_model();
-                                $loginController
-                                    = new login_controller($loginModel);
+                                $loginController = new login_controller($loginModel);
 
                                 if ( $loginModel->getData('login_status') ) {
                                     $this->customError('You are already logged into the system. Logout first then login again if you want to re-login.<br />Thank you.');
@@ -148,7 +146,11 @@ class page_view {
                                     exit();
                                 }
 
-                                $loginController->validateLogin($_POST['username'], $_POST['password']);
+                                $validationResult = $loginController->validateLogin($_POST['username'], $_POST['password']);
+                                if ( $validationResult )
+                                    header('location: '. URL_BASE. 'home/');
+                                else
+                                    $this->customError('<div>Invalid combination of <b>Username</b> and <b>Password</b>.<br /><a href="#forgotPassword">Forgot password</a></div>');
                                 break; //End action validate
 
                             default:
@@ -192,16 +194,23 @@ class page_view {
     } //End function notFoundError
 
     public function authorizationError () {
-        $this->getHeader();
-        echo '<div style="font-size: 12pt; color: #ff0000;">Error: You are not authorized to access this page.</div>';
-        $this->getFooter();
+        $this->customError('You are not authorized to access this page.<br />Please login first. Thank you.');
         exit();
     } //End function authorizationError
 
     public function customError ($customMessage='You have encountered an unidentified error.') {
         $this->getHeader();
-        echo $customMessage;
+        echo '<div style="font-size: 15pt; font-weight: bold; text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.15); color: #f00;">Error:</div>'
+            , $customMessage
+            , '<div>Go to <a href="', URL_BASE, 'home/">homepage</a></div>';
         $this->getFooter();
     } //End function customError
+
+    public function message ($message) {
+        $this->getHeader();
+        echo $message
+            , '<div>Go to <a href="', URL_BASE, 'home/">homepage</a></div>';
+        $this->getFooter();
+    } //End function message
 
 } //End class page_view

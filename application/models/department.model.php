@@ -2,17 +2,6 @@
 
 class department_model {
 
-    private $department_id;
-    private $department_name;
-    private $department_name_short;
-    private $department_description;
-
-    private $department_head_id;
-    private $firstname;
-    private $middlename;
-    private $lastname;
-    private $suffix;
-
     public function __construct () {
 
     } //End function __construct

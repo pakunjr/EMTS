@@ -74,10 +74,13 @@ var searchPackage = function () {
         return false;
 
     var $searchPackage = $('.search-package');
-    $searchPackage.on('keyup', function () {
+    $searchPackage.on('keyup focus', function () {
         initializeSearchEnvironment();
 
-        var searchValue = $searchPackage.val();
+        var $this = $(this)
+            , searchValue = $this.val();
+
+        loadTheSearch(baseURL + 'public/js/search.php?search=package&query=' + searchValue, $this);
     });
 }; //End searchPackage
 

@@ -35,6 +35,7 @@ if ( isset($_GET['search'])
                         OR item.item_model_no LIKE '%$query%'
                         OR itemType.label LIKE '%$query%'
                 ");
+
             $resultOutput = '<tr>'
                 . '<th>Item Name</th>'
                 . '<th>Serial No.</th>'
@@ -43,6 +44,7 @@ if ( isset($_GET['search'])
                 . '<th>Item Description</th>'
                 . '<th>Date of Purchase</th>'
                 . '</tr>';
+
             while ( $row = $result->fetch_assoc() ) {
                 $resultOutput .= '<tr class="search-data">'
                     . '<td>'
@@ -61,10 +63,33 @@ if ( isset($_GET['search'])
             break;
         case 'package':
             $result = $dbController->query("
-                    SELECT *
+                    SELECT package_name
+                        , package_serial_no
+                        , package_description
+                        , date_of_purchase
                     FROM tbl_packages
+                    WHERE package_name LIKE '%$query%'
+                        OR package_serial_no LIKE '%$query%'
+                        OR package_description lIKE '%$query%'
+                        OR date_of_purchase LIKE '%$query%'
                 ");
-            $resultOutput = '';
+
+            $resultOutput = '<tr>'
+                . '<th>Package Name</th>'
+                . '<th>Serial No.</th>'
+                . '<th>Description</th>'
+                . '<th>Date of Purchase</th>'
+                . '</tr>';
+
+            while ( $row = $result->fetch_assoc() ) {
+                $resultOutput .= '<tr>'
+                    . '<td>'. $row['package_name']. '</td>'
+                    . '<td>'. $row['package_serial_no']. '</td>'
+                    . '<td>'. $row['package_description']. '</td>'
+                    . '<td>'. $row['date_of_purchase']. '</td>'
+                    . '</tr>';
+            }
+
             break;
 
         case 'person':
@@ -72,7 +97,9 @@ if ( isset($_GET['search'])
                     SELECT *
                     FROM tbl_persons
                 ");
+
             $resultOutput = '';
+
             break;
 
         default:

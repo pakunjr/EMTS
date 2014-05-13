@@ -12,6 +12,15 @@ class login_controller {
         $dbModel = new database_model();
         $dbController = new database_controller($dbModel);
 
+        /**
+         * Check username if email is used.
+         */
+        if ( filter_var($username, FILTER_VALIDATE_EMAIL) ) {
+            $whereClause = "WHERE person.email_address = '$username'";
+        } else {
+            $whereClause = "WHERE acc.username = '$username'";
+        }
+
         $result = $dbController->query("
                 SELECT acc.account_id
                     , acc.username
@@ -31,7 +40,7 @@ class login_controller {
                     ON acc.owner_id = emp.employee_id
                 LEFT JOIN tbl_persons AS person
                     ON emp.person_id = person.person_id
-                WHERE username = '$username'
+                $whereClause
             ");
 
         if ( $result->num_rows < 1 ) {
@@ -58,11 +67,13 @@ class login_controller {
             $_SESSION['user']['middlename'] = $row['middlename'];
             $_SESSION['user']['lastname'] = $row['lastname'];
             $_SESSION['user']['suffix'] = $row['suffix'];
+            $_SESSION['user']['email'] = $row['email_address'];
 
             $this->model->setData('login_status', true);
-            header('location: '. URL_BASE. 'home/');
+            return true;
         }
-        else header('location: '. URL_BASE. 'home/');
+
+        return false;
     } //End function validateLogin
 
     public function logout () {
