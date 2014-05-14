@@ -142,10 +142,8 @@ var jQueryUIs = function () {
 var FormFx = function () {
 
     /**
-     * TheSearchVia
-     *
-     * Hides one form while showing the necessary
-     * form.
+     * Hide one form while showing the necessary
+     * form. It's like a form accordion.
      */
     var TheSearchVia = function () {
         if ( $('.search-via').length <= 0 ) return false;
@@ -173,12 +171,9 @@ var FormFx = function () {
     }; //End TheSearchVia
 
     /**
-     * TheSelect
-     *
-     * Changes the presentation of select fields whose
-     * choices are only limited to two.
-     * Instead of the usual select field, the choices
-     * will be transformed into two buttons.
+     * Changes the usual appearance of select fields with
+     * only two choices wherein two buttons will represent
+     * the choices.
      */
     var TheSelect = function () {
         if ( $('select').length <= 0 ) return false;
@@ -235,9 +230,8 @@ var FormFx = function () {
     }; //End TheSelect
 
     /**
-     * FormReset
-     *
-     * Necessary actions upon resetting the form.
+     * Properly reset the form so the alternative select tag 
+     * will reset to its default value and to avoid errors.
      */
     var FormReset = function () {
         $('input[type="reset"]').on('click', function (e) {

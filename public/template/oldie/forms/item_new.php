@@ -30,8 +30,8 @@ $formOutput = $formView->openForm(array(
     . $formView->textarea(array('id'=>'item-description', 'label'=>'Description'))
     . $formView->text(array('id'=>'date-of-purchase', 'class'=>'date-picker', 'label'=>'Date of Purchase'))
     . '</span><span class="fields-column">'
-    . $formView->text(array('id'=>'item-owner', 'class'=>'search-item', 'label'=>'Owner'))
-    . $formView->text(array('id'=>'package', 'class'=>'search-package', 'label'=>'Package'))
+    . '<label for="">Item Owner</label><span class="search-person-container"></span>'
+    . '<label for="">Package Group</label><span class="search-package-container"></span>'
     . '</span>'
     . $formView->closeFieldset()
     . $formView->submit(array('value'=>'Save', 'auto_line_break'=>false))

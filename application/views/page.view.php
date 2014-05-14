@@ -200,7 +200,7 @@ class page_view {
 
     public function customError ($customMessage='You have encountered an unidentified error.') {
         $this->getHeader();
-        echo '<div style="font-size: 15pt; font-weight: bold; text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.15); color: #f00;">Error:</div>'
+        echo '<div style="font-size: 15pt; font-weight: bold; text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1); color: #f00;">Error:</div>'
             , $customMessage
             , '<div>Go to <a href="', URL_BASE, 'home/">homepage</a></div>';
         $this->getFooter();

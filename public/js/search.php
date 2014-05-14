@@ -61,6 +61,7 @@ if ( isset($_GET['search'])
                     . '</tr>';
             }
             break;
+
         case 'package':
             $result = $dbController->query("
                     SELECT package_name
@@ -82,7 +83,7 @@ if ( isset($_GET['search'])
                 . '</tr>';
 
             while ( $row = $result->fetch_assoc() ) {
-                $resultOutput .= '<tr>'
+                $resultOutput .= '<tr class="search-data">'
                     . '<td>'. $row['package_name']. '</td>'
                     . '<td>'. $row['package_serial_no']. '</td>'
                     . '<td>'. $row['package_description']. '</td>'
@@ -96,9 +97,28 @@ if ( isset($_GET['search'])
             $result = $dbController->query("
                     SELECT *
                     FROM tbl_persons
+                    WHERE firstname LIKE '%$query%'
+                        OR middlename LIKE '%$query%'
+                        OR lastname LIKE '%$query%'
+                        OR suffix LIKE '%$query%'
                 ");
 
-            $resultOutput = '';
+            $resultOutput = '<tr>'
+                . '<th>Name</th>'
+                . '<th>Gender</th>'
+                . '<th>Birthdate</th>'
+                . '</tr>';
+
+            while ( $row = $result->fetch_assoc() ) {
+                $name = $row['lastname']. ', '. $row['firstname']. ' '. $row['middlename']. ' '. $row['suffix'];
+                $gender = $row['gender'] === 'm' ? 'Male' : 'Female';
+
+                $resultOutput .= '<tr class="search-data">'
+                    . '<td>'. $name. '</td>'
+                    . '<td>'. $gender. '</td>'
+                    . '<td>'. $row['birthdate']. '</td>'
+                    . '</tr>';
+            }
 
             break;
 
