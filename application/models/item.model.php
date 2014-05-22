@@ -53,14 +53,42 @@ class item_model {
                         , '$this->item_model_no'
                         , '$this->item_name'
                         , '$this->item_type'
-                        , '$this->item_description'
+                        , '". $dbController->escapeString($this->item_description). "'
                         , '$this->item_date_of_purchase'
                     )
             ");
         
         if ( !$result ) return false;
 
+        $this->id = $dbController->getInsertedID();
+
         return true;
     } //End function create
+
+    public function connectBarcode () {
+        require('class/BCGColor.php');
+        require('class/BCGDrawing.php');
+        require('class/BCGqrcode.barcode2d.php');
+         
+        $color_black = new BCGColor(0, 0, 0);
+        $color_white = new BCGColor(255, 255, 255);
+         
+        // Barcode Part
+        $code = new BCGqrcode();
+        $code->setScale(3);
+        $code->setForegroundColor($color_black);
+        $code->setBackgroundColor($color_white);
+        $code->setErrorLevel(1);
+        $code->parse('Code 2D!');
+         
+        // Drawing Part
+        $drawing = new BCGDrawing('', $color_white);
+        $drawing->setBarcode($code);
+        $drawing->draw();
+         
+        header('Content-Type: image/png');
+         
+        $drawing->finish(BCGDrawing::IMG_FORMAT_PNG);
+    } //End function connectBarcode
 
 } //End class item

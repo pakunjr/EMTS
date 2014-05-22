@@ -42,7 +42,7 @@ var DisplaySearchButtons = function ($container) {
         var $this = $(this)
             , queryValue = $this.val();
 
-        if ( queryValue.length > 0 )
+        if ( queryValue.length > 1 )
             ExecuteSearch(searchType, queryValue, $resultsContainer);
         else
             $resultsContainer.stop(true, true).hide(250);

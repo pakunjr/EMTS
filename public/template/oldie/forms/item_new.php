@@ -28,6 +28,7 @@ $formOutput = $formView->openForm(array(
     . $formView->text(array('id'=>'item-name', 'label'=>'Name'))
     . $formView->select(array('id'=>'item-type', 'label'=>'Type', 'select_options'=>$itemTypeList))
     . $formView->textarea(array('id'=>'item-description', 'label'=>'Description'))
+    . $formView->textarea(array('id'=>'item-specification', 'label'=>'Specifications'))
     . $formView->text(array('id'=>'date-of-purchase', 'class'=>'date-picker', 'label'=>'Date of Purchase'))
     . '</span><span class="fields-column">'
     . '<label for="">Item Owner</label><span class="search-person-container"></span>'

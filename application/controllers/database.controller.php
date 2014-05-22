@@ -64,4 +64,18 @@ class database_controller {
         $this->model->getData('connection')->close();
     } //End function close
 
+    /**
+     * Escape a string
+     */
+    public function escapeString ($string) {
+        return $this->model->getData('connection')->real_escape_string($string);
+    } //End function escapeString
+
+    /**
+     * Get the latest inserted auto_incremented ID
+     */
+    public function getInsertedID () {
+        return $this->model->getData('connection')->insert_id;
+    } //End getInsertedID
+
 } //End class database_controller

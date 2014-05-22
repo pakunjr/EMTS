@@ -17,6 +17,7 @@ class itemType_model {
         $arrayData = array();
         $result = $dbController->query("
                 SELECT * FROM lst_item_type
+                ORDER BY label ASC
             ");
         while ( $row = $result->fetch_assoc() ) {
             $arrayData[$row['label']] = $row['id'];

@@ -61,7 +61,7 @@ class page_view {
                                 } else {
                                     $this->customError('<div>Item has failed to be created.<br />Possible reasons:<ol>'
                                         . '<li>Item already exist.</li>'
-                                        . '<li>There is an invalid data.</li>'
+                                        . '<li>There is an invalid data.<b</li>'
                                         . '<li>There is something wrong with the system.<br /><small style="color: #f00;">Please do notify the system administrators regarding this matter. Thank you.</small></li>'
                                         . '</ol>Go <a href="'. URL_BASE. 'item/new_item/">back</a></div>');
                                 }

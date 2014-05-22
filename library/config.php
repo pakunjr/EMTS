@@ -8,7 +8,7 @@ $cfg['SYSTEM_SHORT'] = 'EMTS';
 $cfg['SYSTEM_AUTHOR'] = 'Palmer C. Gawaban Jr.';
 $cfg['SYSTEM_YEAR'] = '2014';
 $cfg['SYSTEM_COMPANY'] = 'LORMA COLLEGES';
-$cfg['SYSTEM_TEMPLATE'] = 'oldie';
+$cfg['SYSTEM_TEMPLATE'] = 'colorbox';
 
 /**
  * URLs
