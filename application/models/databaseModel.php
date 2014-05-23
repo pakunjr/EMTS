@@ -1,16 +1,18 @@
 <?php
 
-class pageModel {
+class databaseModel {
 
-private $uri;
+private $connection;
 
-private $module;
-private $controller;
-private $action;
-private $extra;
+private $host;
+private $username;
+private $password;
+private $database;
+private $port;
+private $socket;
 
-public function __construct ($uri) {
-    $this->uri = $uri;
+public function __construct () {
+
 } // __construct
 
 public function getData ($data) {

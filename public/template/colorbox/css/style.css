@@ -1,0 +1,84 @@
+html,
+body {
+    display: block;
+    margin: 0px;
+    padding: 0px;
+    background: #f7f7f7;
+    text-align: center;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 12pt;
+}
+
+a {
+    text-decoration: none;
+    cursor: pointer;
+    color: #328fa6;
+}
+
+#navigation {
+    display: block;
+    margin: 0px;
+    padding: 0px;
+    border-bottom: 1px solid #ccc;
+    background: #fff;
+    text-align: left;
+}
+#navigation > span {
+    display: inline-block;
+    height: 100%;
+    border-right: 1px solid #ccc;
+    vertical-align: top;
+}
+#navigation #user {
+    padding: 3px 15px;
+    float: right;
+}
+
+#content {
+    display: inline-block;
+    width: 980px;
+    min-height: 350px;
+    margin: 20px 0px;
+    padding: 15px 18px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background: #fff;
+    background: rgba(255, 255, 255, 0.95);
+    text-align: left;
+}
+
+#footer {
+    display: block;
+    margin-bottom: 10px;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    background: #fff;
+}
+#footer > span {
+    display: inline-block;
+    width: 980px;
+    padding: 20px 18px;
+    text-align: left;
+}
+#footer > span > a {
+    display: inline-block;
+    margin: 0px 5px 0px 0px;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+    vertical-align: top;
+}
+
+.lorma-logo-150x47 {
+    display: inline-block;
+    width: 150px;
+    height: 47px;
+    background: url('../img/logo_lorma_150x47.jpg') center center no-repeat scroll transparent;
+}
+.lorma-logo-hospital-150x55 {
+    display: inline-block;
+    width: 150px;
+    height: 55px;
+    background: url('../img/logo_lorma_hospital_150x55.jpg') center center no-repeat scroll transparent;
+}

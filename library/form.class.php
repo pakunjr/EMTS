@@ -11,21 +11,21 @@ class form {
             ? $o['auto_label'] : false;
         $this->auto_line_break = isset($o['auto_line_break'])
             ? $o['auto_line_break'] : false;
-    } //__construct
+    } // __construct
 
     /**
      * Open form tag.
      */
     public function openForm ($o=array()) {
         return '<form'.$this->parseAttributes($o).'>';
-    } //openForm
+    } // openForm
 
     /**
      * Close form tag.
      */
     public function closeForm () {
         return '</form>';
-    } //closeForm
+    } // closeForm
 
     /**
      * Open fieldset tag.
@@ -35,14 +35,14 @@ class form {
         $output .= isset($o['legend'])
             ? '<legend>'.$o['legend'].'</legend>' : '';
         return $output;
-    } //openFieldset
+    } // openFieldset
 
     /**
      * Close fieldset tag.
      */
     public function closeFieldset () {
         return '</fieldset>';
-    } //closeFieldset
+    } // closeFieldset
 
     /**
      * Form elements
@@ -56,7 +56,7 @@ class form {
         } else if ( $this->auto_line_break )
             $output .= '<br />';
         return $output;
-    } //text
+    } // text
 
     public function textarea ($o=array()) {
         $output = $this->renderLabel($o)
@@ -67,7 +67,7 @@ class form {
         } else if ( $this->auto_line_break )
             $output .= '<br />';
         return $output;
-    } //End function textarea
+    } // End function textarea
 
     public function password ($o=array()) {
         $output = $this->renderLabel($o)
@@ -78,7 +78,7 @@ class form {
         } else if ( $this->auto_line_break )
             $output .= '<br />';
         return $output;
-    } //End function password
+    } // End function password
 
     public function select ($o=array()) {
         $e = array('select_options'
@@ -111,7 +111,7 @@ class form {
         } else if ( $this->auto_line_break )
             $output .= '<br />';
         return $output;
-    } //End function select
+    } // End function select
 
     public function radio ($o=array()) {
         $e = array('placeholder');
@@ -123,7 +123,7 @@ class form {
         } else if ( $this->auto_line_break )
             $output .= '<br />';
         return $output;
-    } //End function radio
+    } // End function radio
 
     public function button ($o=array()) {
         $e = array('placeholder');
@@ -134,7 +134,7 @@ class form {
         } else if ( $this->auto_line_break )
             $output .= '<br />';
         return $output;
-    } //End function button
+    } // End function button
 
     public function reset ($o=array()) {
         $e = array('placeholder');
@@ -145,7 +145,7 @@ class form {
         } else if ( $this->auto_line_break )
             $output .= '<br />';
         return $output;
-    } //End function reset
+    } // End function reset
 
     public function submit ($o=array()) {
         $e = array('placeholder');
@@ -156,7 +156,7 @@ class form {
         } else if ( $this->auto_line_break )
             $output .= '<br />';
         return $output;
-    } //End function submit
+    } // End function submit
 
     /**
      * Parse the attributes that will be inserted
@@ -204,7 +204,7 @@ class form {
                 $tmp_attr .= ' '.$n.'="'.$v.'"';
         }
         return $tmp_attr;
-    } //End function parseAttributes
+    } // End function parseAttributes
 
     /**
      * Render the label of elements that needs label.
@@ -222,5 +222,5 @@ class form {
                 .$label
                 .'</label>';
         return $output;
-    } //End function renderLabel
+    } // End function renderLabel
 }
