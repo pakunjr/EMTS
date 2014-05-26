@@ -12,15 +12,20 @@ private $port;
 private $socket;
 
 public function __construct () {
+    $this->host = DATABASE_HOST;
+    $this->username = DATABASE_USERNAME;
+    $this->password = DATABASE_PASSWORD;
+    $this->database = DATABASE_NAME;
+    $this->port = DATABASE_PORT;
+    $this->socket = DATABASE_SOCKET;
+} //__construct
 
-} // __construct
-
-public function getData ($data) {
+public function get ($data) {
     return $this->$data;
-} // getData
+} //get
 
-public function setData ($data, $value) {
+public function set ($data, $value) {
     $this->$data = $value;
-} // setData
+} //set
 
 }

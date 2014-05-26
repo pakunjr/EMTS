@@ -6,14 +6,14 @@ private $model;
 
 public function __construct ($model) {
     $this->model = $model;
-} // __construct
+} //__construct
 
 public function connect () {
     $connection = new mysqli(
-            $this->model->getData('host')
-            ,$this->model->getData('username')
-            ,$this->model->getData('password')
-            ,$this->model->getData('database')
+            $this->model->get('host')
+            ,$this->model->get('username')
+            ,$this->model->get('password')
+            ,$this->model->get('database')
         );
 
     if ( $connection->connect_errno ) {
@@ -24,28 +24,29 @@ public function connect () {
             ,$connection->connect_error
             ,'</div>';
     } else {
-        $this->model->setData('connection', $connection);
+        $this->model->set('connection', $connection);
     }
-} // connect
+} //connect
 
 public function disconnect () {
-    $this->model->getData('connection')->close();
-} // disconnect
+    $this->model->get('connection')->close();
+} //disconnect
 
 public function query ($sqlQuery) {
-    $connection = $this->model->getData('connection');
+    $this->connect();
+    $connection = $this->model->get('connection');
     $sql = $connection->query($sqlQuery);
     return $sql;
-} // query
+} //query
 
 public function escapeString ($stringValue) {
-    $connection = $this->model->getData('connection');
+    $connection = $this->model->get('connection');
     return $connection->real_escape_string($stringValue);
-} // escapeString
+} //escapeString
 
 public function getLastID () {
-    $connection = $this->model->getData('connection');
+    $connection = $this->model->get('connection');
     return $connection->insert_id;
-} // getLastID
+} //getLastID
 
 }

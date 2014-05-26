@@ -11,14 +11,14 @@ private $extra;
 
 public function __construct ($uri) {
     $this->uri = $uri;
-} // __construct
+} //__construct
 
-public function getData ($data) {
+public function get ($data) {
     return $this->$data;
-} // getData
+} //get
 
-public function setData ($data, $value) {
+public function set ($data, $value) {
     $this->$data = $value;
-} // setData
+} //set
 
 }

@@ -9,21 +9,27 @@ private $username;
 private $tmp_password;
 private $tmp_passwordSalt;
 
+private $firstname;
+private $middlename;
+private $lastname;
+private $suffix;
+private $name;
+
 public function __construct () {
     $this->isAuthorized = isset($_SESSION['user']) ? true : false;
-} // __construct
+} //__construct
 
 public function __destruct () {
     $this->tmp_password = '';
     $this->tmp_passwordSalt = '';
-} // __destruct
+} //__destruct
 
-public function getData ($data) {
+public function get ($data) {
     return $this->$data;
-} // getData
+} //get
 
-public function setData ($data, $value) {
+public function set ($data, $value) {
     $this->$data = $value;
-} // setData
+} //set
 
 }

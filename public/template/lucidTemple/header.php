@@ -24,12 +24,31 @@
         </a>
     </span>
 
-    <span>
-        <a href="<?php echo URL_BASE,'item/'; ?>">Items</a>
+    <span class="menu-items">
+        <a href="<?php echo URL_BASE,'items/'; ?>">Items</a>
         <ol type="none" class="submenu">
-            <li><a href="">New Item</a></li>
-            <li><a href="">New Package</a></li>
+            <li><a href="<?php echo URL_BASE,'items/new_item/'; ?>">New Item</a></li>
+            <li><a href="<?php echo URL_BASE,'items/new_package/'; ?>">New Package</a></li>
         </ol>
+    </span>
+
+    <span class="menu-items">
+        <a href="<?php echo URL_BASE,'owners/'; ?>">Owners</a>
+        <ol type="none" class="submenu">
+            <li><a href="<?php echo URL_BASE,'owners/complete_list/'; ?>">Complete List</a></li>
+        </ol>
+    </span>
+
+    <span class="menu-items">
+        <a href="<?php echo URL_BASE,'reports/'; ?>">Reports</a>
+        <ol type="none" class="submenu">
+            <li><a href="<?php echo URL_BASE,'reports/generate/'; ?>">Generate Report</a></li>
+            <li><a href="<?php echo URL_BASE,'reports/history/'; ?>">History Report</a></li>
+        </ol>
+    </span>
+
+    <span class="menu-items">
+        <a href="<?php echo URL_BASE,'archives/'; ?>">Archives</a>
     </span>
 
     <span id="user">
@@ -41,5 +60,7 @@
         ?>
     </span>
 </div>
+
+<div class="clear"></div>
 
 <div id="content">

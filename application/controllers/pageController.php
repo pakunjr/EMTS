@@ -6,10 +6,10 @@ private $model;
 
 public function __construct ($model) {
     $this->model = $model;
-} // __construct
+} //__construct
 
 public function routePage () {
-    $uri = $this->model->getData('uri');
+    $uri = $this->model->get('uri');
     $dividedURI = explode('/', $uri);
 
     $module = isset($dividedURI[0]) ? $dividedURI[0] : 'home';
@@ -17,10 +17,10 @@ public function routePage () {
     $action = isset($dividedURI[2]) ? $dividedURI[2] : '';
     $extra = '';
 
-    $this->model->setData('module', $module);
-    $this->model->setData('controller', $controller);
-    $this->model->setData('action', $action);
-    $this->model->setData('extra', $extra);
-} // routePage
+    $this->model->set('module', $module);
+    $this->model->set('controller', $controller);
+    $this->model->set('action', $action);
+    $this->model->set('extra', $extra);
+} //routePage
 
 }
