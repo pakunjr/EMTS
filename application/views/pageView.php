@@ -25,15 +25,8 @@ public function displayURI () {
 
 
 public function renderPage () {
-    /* $POKeyword = 'page-'.$_SERVER['REQUEST_URI'];
-    $pageOutput = $GLOBALS['cache']->get($POKeyword);
-    if ( $pageOutput != null && $pageOutput != NULL ) {
-        echo $pageOutput,'<!-- This is the cached output -->';
-        exit();
-    } */
-
-
     ob_start();
+
     require_once(TEMPLATE_DIR.DS.'header.php');
     $pageModule = $this->model->get('module');
     $pageController = $this->model->get('controller');
@@ -46,22 +39,22 @@ public function renderPage () {
 
 
         case 'login':
-            $model = new loginModel();
-            $view = new loginView($model);
-            $controller = new loginController($model);
+            $loginModel = new loginModel();
+            $loginView = new loginView($loginModel);
+            $loginController = new loginController($loginModel);
             switch ( $pageController ) {
                 case 'validate':
                     if ( isset($_POST['username'])
                             && isset($_POST['password']) ) {
                         $iUsername = $_POST['username'];
                         $iPassword = $_POST['password'];
-                        $controller->validateUser($iUsername, $iPassword);
+                        $loginController->validateUser($iUsername, $iPassword);
                     } else $this->pageError('403');
                     break;
 
 
                 case 'logout':
-                    $controller->logout();
+                    $loginController->logout();
                     break;
 
 
@@ -74,6 +67,10 @@ public function renderPage () {
 
 
         case 'items':
+            $itemModel = new itemModel();
+            $itemView = new itemView($itemModel);
+            $itemController = new itemController($itemModel);
+            $itemView->renderPage($pageController, $pageAction);
             break;
 
 
@@ -99,11 +96,7 @@ public function renderPage () {
     }
     require_once(TEMPLATE_DIR.DS.'footer.php');
 
-
-    $pageOutput = ob_get_contents();
-    //$GLOBALS['cache']->set($POKeyword, $pageOutput, 1800);
     ob_end_flush();
-    echo '<!-- This is the uncached output -->';
 } //renderPage
 
 

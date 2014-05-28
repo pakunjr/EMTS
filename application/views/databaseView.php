@@ -8,6 +8,8 @@ public function __construct ($model) {
     $this->model = $model;
 } //__construct
 
+
+
 public function displaySettings () {
     echo '<div>'
         ,'Below are the settings set for the database connection.<br />'

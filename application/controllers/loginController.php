@@ -18,18 +18,25 @@ public function validateUser ($username, $password) {
     /**
      * Check existence of the username
      */
-    $checkUsername = $dbController->query("
-            SELECT password
-                ,password_salt
-            FROM tbl_accounts
-            WHERE username = '$username'
-            LIMIT 1
+    $validateQuery = $dbController->query("
+            SELECT acc.username
+                ,acc.password
+                ,acc.password_salt
+                ,acc.access_level
+                ,person.firstname
+                ,person.middlename
+                ,person.lastname
+                ,person.suffix
+                ,person.email_address
+            FROM tbl_accounts AS acc
+            LEFT JOIN tbl_persons AS person ON acc.owner_id = person.person_id
+            WHERE acc.username = '$username'
         ");
-    if ( $checkUsername->num_rows > 0 ) {
+    if ( $validateQuery->num_rows > 0 ) {
         /**
          * Validate the combination of username and password
          */
-        $row = $checkUsername->fetch_array();
+        $row = $validateQuery->fetch_array();
         $dbPassword = $row['password'];
         $dbSalt = $row['password_salt'];
 
@@ -37,7 +44,15 @@ public function validateUser ($username, $password) {
 
         if ( $encryptedPass === $dbPassword ) {
             $this->model->set('isAuthorized', true);
-            $_SESSION['user'] = 'Horaoh!';
+            $_SESSION['user'] = array(
+                    'username'  => $row['username']
+                    ,'accessLevel'  => $row['access_level']
+                    ,'firstname'    => $row['firstname']
+                    ,'middlename'   => $row['middlename']
+                    ,'lastname'     => $row['lastname']
+                    ,'suffix'       => $row['suffix']
+                    ,'email'        => $row['email_address']
+                );
             header('location: '.URL_BASE);
         } else
             $GLOBALS['pageView']->pageError('loginError');

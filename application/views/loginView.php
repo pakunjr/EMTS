@@ -8,19 +8,35 @@ public function __construct ($model) {
     $this->model = $model;
 } //__construct
 
+
+
+
+
 /**
  * Determine whether to show login form or
  * infomation and options for the currently
  * logged user.
  */
 public function showLogin () {
+    ob_start();
+
+    echo '<span id="login-module">';
+
     if ( $this->model->get('isAuthorized') ) {
-        echo '<span>',$this->model->get('name'),'</span><br />'
-            ,'<small><a href="',URL_BASE,'login/logout/">Logout</a></small>';
+        echo '<span >Hello <b>',$this->model->get('firstname'),'</b></span><br />'
+            ,'<small style="display: inline-block; margin: 3px 0px 0px 0px; padding: 0px;"><a href="',URL_BASE,'login/logout/"><input type="button" value="Logout" /></a></small>';
     } else {
         $this->displayLoginForm();
     }
+
+    echo '</span>';
+    $htmlLoginContents = ob_get_contents();
+    ob_end_flush();
 } //showLogin
+
+
+
+
 
 public function displayLoginForm () {
     $lf = new form(array(
@@ -34,7 +50,7 @@ public function displayLoginForm () {
             ,'enctype'  => 'multipart/form-data'
         ))
         .$lf->text(array('id'=>'username'))
-        .$lf->password(array('id'=>'password', 'auto_line_break'=>true))
+        .$lf->password(array('id'=>'password','auto_line_break'=>true))
         .$lf->submit(array('value'=>'Login'))
         .$lf->closeForm();
     echo $html;

@@ -12,4 +12,5 @@
     <?php
         $GLOBALS['pageView']->displayURI();
     ?>
+    <br />Error: Page Not Found
 </div>

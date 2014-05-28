@@ -12,9 +12,28 @@ var NavigationMenu = function () {
 }; //NavigationMenu
 
 
+
+/**
+ * A container for jQuery UIs
+ */
+var jQueryUIFx = function () {
+    /**
+     * Make the datepicker working
+     */
+    if ( $('.datepicker').length > 0 ) {
+        $('.datepicker').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: 'yy-mm-dd'
+        }).val('0000-00-00');
+    }
+}; //jQueryUIFx
+
+
 /**
  * Execute all the functions
  */
 $(document).ready(function () {
     NavigationMenu();
+    jQueryUIFx();
 });

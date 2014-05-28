@@ -13,9 +13,9 @@ public function routePage () {
     $dividedURI = explode('/', $uri);
 
     $module = isset($dividedURI[0]) ? $dividedURI[0] : 'home';
-    $controller = isset($dividedURI[1]) ? $dividedURI[1] : '';
-    $action = isset($dividedURI[2]) ? $dividedURI[2] : '';
-    $extra = '';
+    $controller = isset($dividedURI[1]) ? $dividedURI[1] : null;
+    $action = isset($dividedURI[2]) ? $dividedURI[2] : null;
+    $extra = null;
 
     $this->model->set('module', $module);
     $this->model->set('controller', $controller);
