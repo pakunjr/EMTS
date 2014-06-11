@@ -13,9 +13,9 @@
         $GLOBALS['pageView']->displayURI();
 
         $lm = new loginModel();
-        if ( $lm->get('isAuthorized') ) {
-            echo 'Username: ',$lm->get('username'),'<br />'
-                ,'Access Level: ',$lm->get('accessLevel');
+        if ( $lm->data('isAuthorized') ) {
+            echo 'Username: ',$lm->data('username'),'<br />'
+                ,'Access Level: ',$lm->data('accessLevel');
         }
     ?>
     <br />Error: Forbidden Access

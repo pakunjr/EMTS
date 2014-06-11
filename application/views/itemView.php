@@ -11,16 +11,21 @@ public function __construct ($model) {
 
 
 
-public function renderPage ($controller, $action) {
+public function renderPage ($controller, $action=null, $extra=null) {
     $lm = new loginModel();
     $lc = new loginController($lm);
 
-    if ( !$lm->get('isAuthorized') ) {
+    if ( !$lm->data('isAuthorized') ) {
         $GLOBALS['pageView']->pageError('403');
         return false;
     }
 
     switch ( $controller ) {
+        case null:
+            require_once(FORMS_DIR.DS.'item'.DS.'frontpage.php');
+            break;
+
+
         case 'new_item':
             switch ( $action ) {
                 case null:
@@ -29,11 +34,20 @@ public function renderPage ($controller, $action) {
 
 
                 default:
+                    $GLOBALS['pageView']->pageError('404');
             }
             break;
 
 
-        case 'new_package':
+        case 'update_item':
+            switch ( $action ) {
+                case null:
+                    require_once(FORMS_DIR.DS.'item'.DS.'itemUpdate.php');
+                    break;
+
+                default:
+                    $GLOBALS['pageView']->pageError('404');
+            }
             break;
 
 

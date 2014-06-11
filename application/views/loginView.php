@@ -22,8 +22,8 @@ public function showLogin () {
 
     echo '<span id="login-module">';
 
-    if ( $this->model->get('isAuthorized') ) {
-        echo '<span >Hello <b>',$this->model->get('firstname'),'</b></span><br />'
+    if ( $this->model->data('isAuthorized') ) {
+        echo '<span >Hello <b>',$this->model->data('firstname'),'</b></span><br />'
             ,'<small style="display: inline-block; margin: 3px 0px 0px 0px; padding: 0px;"><a href="',URL_BASE,'login/logout/"><input type="button" value="Logout" /></a></small>';
     } else {
         $this->displayLoginForm();

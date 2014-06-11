@@ -9,7 +9,7 @@ public function __construct ($model) {
 } //__construct
 
 public function routePage () {
-    $uri = $this->model->get('uri');
+    $uri = $this->model->data('uri');
     $dividedURI = explode('/', $uri);
 
     $module = isset($dividedURI[0]) ? $dividedURI[0] : 'home';
@@ -17,10 +17,10 @@ public function routePage () {
     $action = isset($dividedURI[2]) ? $dividedURI[2] : null;
     $extra = null;
 
-    $this->model->set('module', $module);
-    $this->model->set('controller', $controller);
-    $this->model->set('action', $action);
-    $this->model->set('extra', $extra);
+    $this->model->data('module', $module);
+    $this->model->data('controller', $controller);
+    $this->model->data('action', $action);
+    $this->model->data('extra', $extra);
 } //routePage
 
 }

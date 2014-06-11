@@ -10,10 +10,10 @@ public function __construct ($model) {
 
 public function connect () {
     $connection = new mysqli(
-            $this->model->get('host')
-            ,$this->model->get('username')
-            ,$this->model->get('password')
-            ,$this->model->get('database')
+            $this->model->data('host')
+            ,$this->model->data('username')
+            ,$this->model->data('password')
+            ,$this->model->data('database')
         );
 
     if ( $connection->connect_errno ) {
@@ -24,28 +24,28 @@ public function connect () {
             ,$connection->connect_error
             ,'</div>';
     } else {
-        $this->model->set('connection', $connection);
+        $this->model->data('connection', $connection);
     }
 } //connect
 
 public function disconnect () {
-    $this->model->get('connection')->close();
+    $this->model->data('connection')->close();
 } //disconnect
 
 public function query ($sqlQuery) {
     $this->connect();
-    $connection = $this->model->get('connection');
+    $connection = $this->model->data('connection');
     $sql = $connection->query($sqlQuery);
     return $sql;
 } //query
 
 public function escapeString ($stringValue) {
-    $connection = $this->model->get('connection');
+    $connection = $this->model->data('connection');
     return $connection->real_escape_string($stringValue);
 } //escapeString
 
 public function getLastID () {
-    $connection = $this->model->get('connection');
+    $connection = $this->model->data('connection');
     return $connection->insert_id;
 } //getLastID
 

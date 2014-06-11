@@ -43,7 +43,7 @@ public function validateUser ($username, $password) {
         $encryptedPass = $this->encryptPassword($password, $dbSalt);
 
         if ( $encryptedPass === $dbPassword ) {
-            $this->model->set('isAuthorized', true);
+            $this->model->data('isAuthorized', true);
             $_SESSION['user'] = array(
                     'username'  => $row['username']
                     ,'accessLevel'  => $row['access_level']
@@ -71,7 +71,7 @@ public function logout () {
 
 
 public function encryptPassword ($password, $salt) {
-    return hash('sha256', $password. $salt);
+    return hash('sha256', $password.$salt);
 } //encryptPassword
 
 }

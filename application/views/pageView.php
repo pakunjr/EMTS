@@ -15,23 +15,22 @@ public function __construct ($model) {
 
 
 public function displayURI () {
-    echo 'URI: ',URL_BASE,$this->model->get('uri'),'<br />'
-        ,'Module: ',$this->model->get('module'),'<br />'
-        ,'Controller: ',$this->model->get('controller'),'<br />'
-        ,'Action: ',$this->model->get('action');
+    echo 'URI: ',URL_BASE,$this->model->data('uri'),'<br />'
+        ,'Module: ',$this->model->data('module'),'<br />'
+        ,'Controller: ',$this->model->data('controller'),'<br />'
+        ,'Action: ',$this->model->data('action');
 } //displayURI
 
 
 
 
 public function renderPage () {
-    ob_start();
-
     require_once(TEMPLATE_DIR.DS.'header.php');
-    $pageModule = $this->model->get('module');
-    $pageController = $this->model->get('controller');
-    $pageAction = $this->model->get('action');
-    switch ( $pageModule ) {
+    $URIModule = $this->model->data('module');
+    $URIController = $this->model->data('controller');
+    $URIAction = $this->model->data('action');
+    $URIExtra = $this->model->data('extra');
+    switch ( $URIModule ) {
         case 'home':
             require_once(TEMPLATE_DIR.DS.'home.php');
             break;
@@ -42,7 +41,7 @@ public function renderPage () {
             $loginModel = new loginModel();
             $loginView = new loginView($loginModel);
             $loginController = new loginController($loginModel);
-            switch ( $pageController ) {
+            switch ( $URIController ) {
                 case 'validate':
                     if ( isset($_POST['username'])
                             && isset($_POST['password']) ) {
@@ -70,7 +69,7 @@ public function renderPage () {
             $itemModel = new itemModel();
             $itemView = new itemView($itemModel);
             $itemController = new itemController($itemModel);
-            $itemView->renderPage($pageController, $pageAction);
+            $itemView->renderPage($URIController, $URIAction, $URIExtra);
             break;
 
 
@@ -95,8 +94,6 @@ public function renderPage () {
             $this->pageError('404');
     }
     require_once(TEMPLATE_DIR.DS.'footer.php');
-
-    ob_end_flush();
 } //renderPage
 
 

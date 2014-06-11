@@ -7,6 +7,7 @@ body {
     background: #f7f7f7;
     text-align: center;
     font-family: Helvetica, Arial, sans-serif;
+    font-size: 1em;
     color: #333;
 }
 
@@ -21,13 +22,22 @@ a {
 fieldset {
     margin: 0px 0px 10px 0px;
     border-bottom-right-radius: 15px;
-    border-color: #ccc;
-    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
+}
+fieldset > legend {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }
 
 label {
     display: inline-block;
+    max-width: 105px;
     margin: 0px 7px 1px 0px;
+    padding: 5px 0px;
+    font-size: 0.85em;
+    vertical-align: middle;
 }
 
 input[type="text"],
@@ -39,6 +49,7 @@ select {
     padding: 5px 7px;
     border: 1px solid #ccc;
     background: #fff;
+    vertical-align: middle;
 }
 input[type="text"]:hover,
 input[type="password"]:hover,
@@ -54,6 +65,7 @@ select:focus {
     background: #e7ffe5;
 }
 textarea {
+    min-height: 50px;
     resize: vertical;
 }
 
@@ -111,6 +123,7 @@ input[type="submit"]:active {
     margin: 0px 5px 5px 0px;
     padding: 0px;
     text-align: right;
+    vertical-align: top;
 }
 .row {
     display: block;
@@ -125,6 +138,39 @@ input[type="submit"]:active {
 .clear,
 .cleafix {
     clear: both;
+}
+
+
+
+.hidden {
+    display: none;
+}
+
+
+.unhighlightable,
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+
+
+.button-option {
+    display: inline-block;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    color: #333;
+    cursor: pointer;
+}
+.button-option.selected {
+    border-color: #00331f;
+    background: #053;
+    color: #fff;
 }
 
 
@@ -147,17 +193,20 @@ input[type="submit"]:active {
     padding: 0px;
     overflow: hidden;
     border-right: 1px solid #ccc;
-    font-size: 11.5pt;
+    font-size: 12pt;
     vertical-align: middle;
 }
 #navigation .menu-items:hover {
     background: #e5f8ff;
     text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.15);
 }
+#navigation .menu-items:active {
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.10) inset;
+}
 #navigation .menu-items a {
     display: block;
     padding: 20px 10px;
-    font-size: 15pt;
+    font-size: 1.1em;
     cursor: pointer;
 }
 #navigation .menu-items .submenu {
@@ -187,7 +236,7 @@ input[type="submit"]:active {
     padding: 10px 19px;
     border: 1px solid transparent;
     border-bottom: 1px solid #ccc;
-    font-size: 11pt;
+    font-size: 0.9em;
 }
 #navigation .menu-items .submenu a:hover {
     border: 1px solid #266e80;
@@ -210,7 +259,7 @@ input[type="submit"]:active {
 }
 
 #login-form {
-    font-size: 10pt;
+    font-size: 0.8em;
     text-align: right;
 }
 #login-form label {
@@ -238,7 +287,7 @@ input[type="submit"]:active {
 #content {
     display: inline-block;
     width: 980px;
-    min-height: 400px;
+    min-height: 250px;
     margin: 20px 0px;
     padding: 15px 18px;
     border: 1px solid #ccc;
@@ -253,11 +302,8 @@ input[type="submit"]:active {
 
 
 #footer {
-    display: block;
+    display: inline-block;
     margin-bottom: 10px;
-    border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
-    background: #fff;
 }
 #footer > span {
     display: inline-block;
@@ -322,3 +368,49 @@ input[type="submit"]:active {
     font-weight: bold;
     text-shadow: 2px 2px 0px rgba(255, 255, 255, 1.0);
 }
+
+
+
+
+/**
+ * Frontpages on each pages
+ */
+.frontpage-title {
+    display: block;
+    margin: 0px 0px 10px 0px;
+    padding: 10px 0px;
+    border-bottom: 1px solid #053;
+    font-size: 1.5em;
+    font-variant: small-caps;
+    text-align: left;
+}
+.frontpage-option {
+    display: inline-block;
+    width: 150px;
+    height: auto;
+    margin: 0px;
+    padding: 10px;
+    overflow: hidden;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+.frontpage-option:hover {
+    border-color: #053;
+}
+.frontpage-option:active {
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.10) inset;
+}
+.frontpage-option-image {
+    display: block;
+    width: auto;
+    height: 100px;
+    margin: 0px 0px 10px 0px;
+    padding: 0px;
+    text-align: center;
+}
+.frontpage-option-name {
+    display: block;
+    text-align: center;
+}
+

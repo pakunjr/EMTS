@@ -13,12 +13,11 @@ public function __construct ($uri) {
     $this->uri = $uri;
 } //__construct
 
-public function get ($data) {
-    return $this->$data;
-} //get
 
-public function set ($data, $value) {
-    $this->$data = $value;
-} //set
+
+public function data ($name, $value=null) {
+    if ( $value == null ) return $this->$name;
+    $this->$name = $value;
+} //data
 
 }
