@@ -13,6 +13,10 @@ class form {
             ? $o['auto_line_break'] : false;
     } // __construct
 
+
+
+
+
     /**
      * Open form tag.
      */
@@ -20,12 +24,20 @@ class form {
         return '<form'.$this->parseAttributes($o).'>';
     } // openForm
 
+
+
+
+
     /**
      * Close form tag.
      */
     public function closeForm () {
         return '</form>';
     } // closeForm
+
+
+
+
 
     /**
      * Open fieldset tag.
@@ -37,6 +49,10 @@ class form {
         return $output;
     } // openFieldset
 
+
+
+
+
     /**
      * Close fieldset tag.
      */
@@ -44,9 +60,26 @@ class form {
         return '</fieldset>';
     } // closeFieldset
 
+
+
+
+
     /**
      * Form elements
      */
+    public function hidden ($o=array()) {
+        $output = '<input type="hidden"'.$this->parseAttributes($o).' />';
+        if ( isset($o['auto_line_break']) ) {
+            if ( $o['auto_line_break'] )
+                $output .= '<br />';
+        } else if ( $this->auto_line_break )
+            $output .= '<br />';
+        return $output;
+    } //hidden
+
+
+
+
     public function text ($o=array()) {
         $output = $this->renderLabel($o)
                 .'<input type="text"'.$this->parseAttributes($o).' />';
@@ -57,6 +90,10 @@ class form {
             $output .= '<br />';
         return $output;
     } // text
+
+
+
+
 
     public function textarea ($o=array()) {
         $output = $this->renderLabel($o)
@@ -69,6 +106,10 @@ class form {
         return $output;
     } // End function textarea
 
+
+
+
+
     public function password ($o=array()) {
         $output = $this->renderLabel($o)
                 .'<input type="password"'.$this->parseAttributes($o).' />';
@@ -79,6 +120,10 @@ class form {
             $output .= '<br />';
         return $output;
     } // End function password
+
+
+
+
 
     public function select ($o=array()) {
         $e = array('select_options'
@@ -113,6 +158,10 @@ class form {
         return $output;
     } // End function select
 
+
+
+
+
     public function radio ($o=array()) {
         $e = array('placeholder');
         $output = $this->renderLabel($o)
@@ -125,6 +174,10 @@ class form {
         return $output;
     } // End function radio
 
+
+
+
+
     public function button ($o=array()) {
         $e = array('placeholder');
         $output = '<input type="button"'.$this->parseAttributes($o, $e).' />';
@@ -135,6 +188,10 @@ class form {
             $output .= '<br />';
         return $output;
     } // End function button
+
+
+
+
 
     public function reset ($o=array()) {
         $e = array('placeholder');
@@ -147,6 +204,10 @@ class form {
         return $output;
     } // End function reset
 
+
+
+
+
     public function submit ($o=array()) {
         $e = array('placeholder');
         $output = '<input type="submit"'.$this->parseAttributes($o, $e).' />';
@@ -157,6 +218,10 @@ class form {
             $output .= '<br />';
         return $output;
     } // End function submit
+
+
+
+
 
     /**
      * Parse the attributes that will be inserted
@@ -205,6 +270,10 @@ class form {
         }
         return $tmp_attr;
     } // End function parseAttributes
+
+
+
+
 
     /**
      * Render the label of elements that needs label.

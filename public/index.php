@@ -7,8 +7,9 @@ else {
     exit();
 }
 
+
 /**
- * Render the page.
+ * Render the page
  */
 $uri = isset($_GET['url']) ? $_GET['url'] : 'home';
 
@@ -18,3 +19,4 @@ $pageController = new pageController($pageModel);
 
 $pageController->routePage();
 $pageView->renderPage();
+

@@ -36,7 +36,7 @@ label {
     max-width: 105px;
     margin: 0px 7px 1px 0px;
     padding: 5px 0px;
-    font-size: 0.85em;
+    font-size: 0.83em;
     vertical-align: middle;
 }
 
@@ -45,11 +45,15 @@ input[type="password"],
 textarea,
 select {
     display: inline-block;
+    max-width: 150px;
     margin: 0px 3px 1px 0px;
     padding: 5px 7px;
     border: 1px solid #ccc;
     background: #fff;
     vertical-align: middle;
+}
+select {
+    padding: 2px;
 }
 input[type="text"]:hover,
 input[type="password"]:hover,
@@ -116,11 +120,19 @@ input[type="submit"]:active {
 
 
 
+th,
+td {
+    margin: 0px;
+    padding: 10px 15px;
+    vertical-align: top;
+}
+
+
 
 
 .column {
     display: inline-block;
-    margin: 0px 5px 5px 0px;
+    margin: 0px 15px 5px 0px;
     padding: 0px;
     text-align: right;
     vertical-align: top;
@@ -142,6 +154,7 @@ input[type="submit"]:active {
 
 
 
+.hide,
 .hidden {
     display: none;
 }
@@ -161,6 +174,7 @@ input[type="submit"]:active {
 
 .button-option {
     display: inline-block;
+    margin: 0px 5px 0px 0px;
     padding: 10px 15px;
     border-radius: 5px;
     border: 1px solid #ccc;
@@ -336,6 +350,9 @@ input[type="submit"]:active {
 
 
 
+.datepicker {
+    cursor: pointer;
+}
 
 /**
  * Datepicker styles
@@ -388,7 +405,7 @@ input[type="submit"]:active {
     display: inline-block;
     width: 150px;
     height: auto;
-    margin: 0px;
+    margin: 0px 10px 0px 0px;
     padding: 10px;
     overflow: hidden;
     border-radius: 5px;
@@ -413,4 +430,95 @@ input[type="submit"]:active {
     display: block;
     text-align: center;
 }
+
+
+
+
+
+
+
+/**
+ * Instructional notes
+ */
+.note {
+    display: inline-block;
+    margin: 3px 0px 0px -5px;
+    position: absolute;
+}
+.icon-note {
+    display: block;
+    width: 15px;
+    height: 15px;
+    border-radius: 15px;
+    background: url('../img/icon_instructional_note.png') center center no-repeat scroll transparent;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+}
+.icon-note:active {
+    box-shadow: 0px 0px 0px transparent;
+}
+.note-title {
+    margin: 0px 0px 8px 0px;
+    padding: 0px 0px 10px 0px;
+    border-bottom: 1px solid #ccc;
+}
+.note-content {
+    width: 300px;
+    height: auto;
+    margin: -15px 0px 0px 0px;
+    padding: 15px 20px;
+    position: absolute;
+    z-index: 1;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background: #fff;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.15);
+    text-align: left;
+    font-size: 0.8em;
+    cursor: pointer;
+}
+.note-content a:hover {
+    text-decoration: underline;
+}
+.note-close {
+    display: block;
+    margin: 10px 0px 0px 0px;
+    padding: 7px 0px 0px 0px;
+    border-top: 1px solid #ccc;
+    font-size: 0.8em;
+    color: #f00;
+}
+
+
+
+
+
+
+
+
+/**
+ * Search results container and such
+ */
+.search-results {
+    margin: 0px;
+    padding: 10px;
+    position: absolute;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    background: #fff;
+    font-size: 0.85em;
+    text-align: left;
+}
+.search-results tr:nth-child(2n) {
+    background: #e2ffe3;
+}
+.search-results .search-data {
+    border-top: 1px solid #ccc;
+    cursor: pointer;
+}
+.search-results .search-data:hover {
+    background: #e2f8ff;
+}
+
+
 

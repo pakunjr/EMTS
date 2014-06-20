@@ -21,6 +21,8 @@ public function __construct () {
     $this->isAuthorized = isset($_SESSION['user']) ? true : false;
     $this->username = isset($_SESSION['user']['username'])
         ? $_SESSION['user']['username'] : null;
+    $this->accessLevelID = isset($_SESSION['user']['accessLevelID'])
+        ? $_SESSION['user']['accessLevelID'] : null;
     $this->accessLevel = isset($_SESSION['user']['accessLevel'])
         ? $_SESSION['user']['accessLevel'] : null;
     $this->firstname = isset($_SESSION['user']['firstname'])
@@ -34,6 +36,8 @@ public function __construct () {
     $this->email = isset($_SESSION['user']['email'])
         ? $_SESSION['user']['email'] : null;
 } //__construct
+
+
 
 public function __destruct () {
     $this->tmp_password = null;

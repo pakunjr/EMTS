@@ -33,11 +33,3 @@ $cfg['DATABASE_SOCKET'] = '';
  */
 foreach ( $cfg as $c => $o ) { defined($c) or define($c, $o); }
 
-/**
- * Configure and include phpfastcache version 2
- */
-$f = PLUGINS_DIR.DS.'phpfastcache'.DS.'phpfastcache_v2.1_release'.DS.'phpfastcache'.DS.'phpfastcache.php';
-if ( file_exists($f) ) require_once($f);
-else echo '<div style="color: #f00;"><b>Error: </b>phpfastcache plugin is broken.<br />Please contact a system administrator immediately regarding this error.<br />Thank you.</div>';
-phpFastCache::setup('storage', 'auto');
-$cache = phpFastCache();

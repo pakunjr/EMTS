@@ -12,4 +12,8 @@
     <?php
         echo '<b>Username</b>: ',$_POST['username'];
     ?>
+    <br />
+    
+    <hr />
+    <a href="#forgotPassword">Forgot Password?</a>
 </div>

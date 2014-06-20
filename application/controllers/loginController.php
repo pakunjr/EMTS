@@ -22,14 +22,16 @@ public function validateUser ($username, $password) {
             SELECT acc.username
                 ,acc.password
                 ,acc.password_salt
-                ,acc.access_level
+                ,acc.access_level AS access_level_id
                 ,person.firstname
                 ,person.middlename
                 ,person.lastname
                 ,person.suffix
                 ,person.email_address
+                ,access.name AS access_level
             FROM tbl_accounts AS acc
             LEFT JOIN tbl_persons AS person ON acc.owner_id = person.person_id
+            LEFT JOIN lst_access_level AS access ON acc.access_level = access.id
             WHERE acc.username = '$username'
         ");
     if ( $validateQuery->num_rows > 0 ) {
@@ -45,13 +47,14 @@ public function validateUser ($username, $password) {
         if ( $encryptedPass === $dbPassword ) {
             $this->model->data('isAuthorized', true);
             $_SESSION['user'] = array(
-                    'username'  => $row['username']
-                    ,'accessLevel'  => $row['access_level']
-                    ,'firstname'    => $row['firstname']
-                    ,'middlename'   => $row['middlename']
-                    ,'lastname'     => $row['lastname']
-                    ,'suffix'       => $row['suffix']
-                    ,'email'        => $row['email_address']
+                    'username'          => $row['username']
+                    ,'accessLevelID'    => $row['access_level_id']
+                    ,'accessLevel'      => $row['access_level']
+                    ,'firstname'        => $row['firstname']
+                    ,'middlename'       => $row['middlename']
+                    ,'lastname'         => $row['lastname']
+                    ,'suffix'           => $row['suffix']
+                    ,'email'            => $row['email_address']
                 );
             header('location: '.URL_BASE);
         } else

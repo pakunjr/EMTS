@@ -2,7 +2,15 @@
 
 class itemModel {
 
-private $item_id;
+private $itemID;
+
+
+private $itemSerialNo;
+private $itemModelNo;
+private $itemName;
+private $itemType;
+private $itemDescription;
+private $itemDateOfPurchase;
 
 
 

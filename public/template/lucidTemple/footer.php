@@ -8,6 +8,10 @@
     -->
 </span></div>
 
+<script type="text/javascript">
+    var URLBase = '<?php echo URL_BASE; ?>'
+        ,URLTemplate = '<?php echo URL_TEMPLATE; ?>';
+</script>
 <script type="text/javascript" src="<?php echo URL_TEMPLATE,'js/script.js'; ?>"></script>
 
 </body></html>

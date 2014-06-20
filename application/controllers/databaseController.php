@@ -8,6 +8,9 @@ public function __construct ($model) {
     $this->model = $model;
 } //__construct
 
+
+
+
 public function connect () {
     $connection = new mysqli(
             $this->model->data('host')
@@ -28,21 +31,41 @@ public function connect () {
     }
 } //connect
 
+
+
+
 public function disconnect () {
     $this->model->data('connection')->close();
 } //disconnect
+
+
+
 
 public function query ($sqlQuery) {
     $this->connect();
     $connection = $this->model->data('connection');
     $sql = $connection->query($sqlQuery);
     return $sql;
+
+    /**
+     * Prepare statement
+     * pending
+     */
+    $stmt = $connection->prepare($sqlQuery);
 } //query
 
+
+
+
 public function escapeString ($stringValue) {
+    $this->connect();
     $connection = $this->model->data('connection');
-    return $connection->real_escape_string($stringValue);
+    $escapedString = $connection->real_escape_string($stringValue);
+    return $escapedString;
 } //escapeString
+
+
+
 
 public function getLastID () {
     $connection = $this->model->data('connection');
