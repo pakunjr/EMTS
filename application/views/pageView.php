@@ -106,7 +106,9 @@ public function renderPage () {
 
 
         case 'owners':
-            $this->pageError('underconstruction');
+            $ownershipM = new ownershipModel();
+            $ownershipV = new ownershipView($ownershipM);
+            $ownershipV->renderPage($URIController, $URIAction, $URIExtra);
             break;
 
 
@@ -172,6 +174,7 @@ public function renderNavigation ($echo=true) {
             .'<a href="'.URL_BASE.'items/">Items</a>'
             .'<ol type="none" class="submenu">'
             .'<li><a href="'.URL_BASE.'items/new_item/">New Item/s</a></li>'
+            .'<li><a href="'.URL_BASE.'items/view_all">View Items</a></li>'
             .'</ol>'
             .'</span>';
 

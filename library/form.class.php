@@ -21,7 +21,7 @@ class form {
      * Open form tag.
      */
     public function openForm ($o=array()) {
-        return '<form'.$this->parseAttributes($o).'>';
+        return '<form autocomplete="off"'.$this->parseAttributes($o).'>';
     } // openForm
 
 

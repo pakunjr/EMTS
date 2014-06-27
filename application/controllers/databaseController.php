@@ -61,15 +61,23 @@ public function escapeString ($stringValue) {
     $this->connect();
     $connection = $this->model->data('connection');
     $escapedString = $connection->real_escape_string($stringValue);
-    return $escapedString;
+    return trim($escapedString);
 } //escapeString
 
+public function escapeArray ($array) {
+    return array_map(array($this, 'escapeString'), $array);
+} //escapeArray
 
 
 
-public function getLastID () {
+
+public function insertedID ($echo=false) {
     $connection = $this->model->data('connection');
-    return $connection->insert_id;
-} //getLastID
+    if ( !$echo ) return $connection->insert_id;
+    echo $connection->insert_id;
+} //insertedID
+
+
+
 
 }

@@ -13,29 +13,44 @@ public function __construct ($model) {
 } //__construct
 
 
-public function renderInstructions ($echo=false) {
-    $this->controller->generateDescriptionList();
-    $descriptionList = $this->model->data('list');
 
-    $lists = '';
-    foreach ( $descriptionList as $label => $description ) {
-        $lists .= '<tr>'
-            .'<td>'.$label.'</td>'
-            .'<td>'.$description.'</td>'
-            .'</tr>';
+
+
+
+public function generateSelectOptions () {
+    $this->controller->generateList();
+    $options = array();
+    foreach ( $this->model->data('list') as $i ) {
+        $label = $i['label'];
+        $value = $i['id'];
+        $options[$label] = $value;
     }
+    return $options;
+} //generateSelectOptions
 
-    $instructions = '<table>'
+
+
+
+
+public function generateNote ($echo=false) {
+    $this->controller->generateList();
+    $output = '<table>'
         .'<tr>'
         .'<th>Label</th>'
         .'<th>Description</th>'
-        .'</tr>'
-        .$lists
-        .'</table>';
+        .'</tr>';
+    foreach ( $this->model->data('list') as $i ) {
+        $output .= '<tr>'
+            .'<td>'.$i['label'].'</td>'
+            .'<td>'.$i['description'].'</td>'
+            .'</tr>';
+    }
+    $output .= '</table>';
 
-    if ( !$echo ) return $instructions;
-    echo $instructions;
-} //renderInstructions
+
+    if ( !$echo ) return $output;
+    echo $output;
+} //generateNote
 
 
 }

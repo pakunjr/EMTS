@@ -12,7 +12,7 @@ public function __construct ($model) {
 
 
 
-public function searchPerson ($searchQuery) {
+public function searchPerson ($searchQuery, $searchType='employee') {
 
     $dbM = new databaseModel();
     $dbV = new databaseView($dbM);
@@ -20,23 +20,52 @@ public function searchPerson ($searchQuery) {
 
     $searchList = array();
 
-    $sqlQuery = "
-            SELECT person_id
-                ,firstname
-                ,middlename
-                ,lastname
-                ,suffix
-                ,gender
-                ,birthdate
-                ,email_address
-            FROM tbl_persons
-            WHERE firstname LIKE '%$searchQuery%'
-                OR middlename lIKE '%$searchQuery%'
-                OR lastname LIKE '%$searchQuery%'
-                OR suffix LIKE '%$searchQuery%'
-                OR email_address LIKE '%$searchQuery%'
-            ORDER BY lastname ASC
-        ";
+    if ( $searchType == 'guest' ) {
+        $sqlQuery = "
+                SELECT
+                    guests.guest_id AS owner_id
+                    ,persons.firstname
+                    ,persons.middlename
+                    ,persons.lastname
+                    ,persons.suffix
+                    ,persons.gender
+                    ,persons.birthdate
+                    ,persons.email_address
+                FROM tbl_guests AS guests
+                LEFT JOIN
+                    tbl_persons AS persons ON guests.person_id = persons.person_id
+                WHERE
+                    persons.firstname LIKE '%$searchQuery%'
+                    OR persons.middlename lIKE '%$searchQuery%'
+                    OR persons.lastname LIKE '%$searchQuery%'
+                    OR persons.suffix LIKE '%$searchQuery%'
+                    OR persons.email_address LIKE '%$searchQuery%'
+                ORDER BY persons.lastname ASC
+            ";
+    } else { //include employee
+        $sqlQuery = "
+                SELECT
+                    employees.employee_id AS owner_id
+                    ,persons.firstname
+                    ,persons.middlename
+                    ,persons.lastname
+                    ,persons.suffix
+                    ,persons.gender
+                    ,persons.birthdate
+                    ,persons.email_address
+                FROM tbl_employees AS employees
+                LEFT JOIN
+                    tbl_persons AS persons ON employees.person_id = persons.person_id
+                WHERE
+                    persons.firstname LIKE '%$searchQuery%'
+                    OR persons.middlename lIKE '%$searchQuery%'
+                    OR persons.lastname LIKE '%$searchQuery%'
+                    OR persons.suffix LIKE '%$searchQuery%'
+                    OR persons.email_address LIKE '%$searchQuery%'
+                ORDER BY persons.lastname ASC
+            ";
+    }
+
 
     $result = $dbC->query($sqlQuery);
     while ( $row = $result->fetch_assoc() ) {
@@ -44,7 +73,7 @@ public function searchPerson ($searchQuery) {
             'Male' : 'Female';
 
         $info = array(
-                '<input class="search-result-identifier" type="hidden" value="'.$row['person_id'].'" />'
+                '<input class="search-result-identifier" type="hidden" value="'.$row['owner_id'].'" />'
                 .'<span class="search-result-label">'
                 .$row['lastname'].', '
                 .$row['firstname'].' '

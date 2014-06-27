@@ -1,14 +1,24 @@
 <?php
 
-class itemTypeView {
+class itemStateView {
 
 private $model;
 private $controller;
 
+
+
+
+
+
+
+
 public function __construct ($model) {
+
     $this->model = $model;
-    $this->controller = new itemTypeController($this->model);
+    $this->controller = new itemStateController($this->model);
+
 } //__construct
+
 
 
 
@@ -16,16 +26,14 @@ public function __construct ($model) {
 
 public function generateSelectOptions () {
     $this->controller->generateList();
-    $options = array();
+    $option = array();
     foreach ( $this->model->data('list') as $i ) {
         $id = $i['id'];
         $label = $i['label'];
-        $options[$label] = $id;
+        $option[$label] = $id;
     }
-    return $options;
-} //generateSelectOptions
-
-
+    return $option;
+} //generateSelectOption
 
 
 

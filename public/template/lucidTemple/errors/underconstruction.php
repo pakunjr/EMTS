@@ -11,5 +11,5 @@
     <?php
         $GLOBALS['pageView']->displayURI();
     ?>
-    <br />This page Under Construction / Maintenance
+    <br />This page is Under Construction / Maintenance
 </div>

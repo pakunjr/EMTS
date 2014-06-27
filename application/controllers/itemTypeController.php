@@ -19,53 +19,56 @@ public function __construct ($model) {
 
 
 
-public function generateList () {
 
-    $itList = $GLOBALS['cache']->get('itemType_IDLabel_list');
-    if ( $itList == null ) {
+public function decode ($id, $echo=false) {
+
+    $cacheKeyword = 'itemType_label_'.$id;
+    $label = $GLOBALS['cache']->get($cacheKeyword);
+    if ( $label == null ) {
+        $query = "
+            SELECT label
+            FROM lst_item_type
+            WHERE
+                id = $id
+        ";
+        $result = $this->dbC->query($query);
+        $row = $result->fetch_assoc();
+
+        $label = $row['label'];
+        $GLOBALS['cache']->set($cacheKeyword, $label, 3600);
+    }
+
+    if ( !$echo ) return $label;
+    echo $label;
+} //decode
+
+
+
+
+
+
+public function generateList () {
+    $list = $GLOBALS['cache']->get('itemType_list');
+    if ( $list == null ) {
         $list = array();
-        $result = $this->dbC->query("
-                SELECT id
-                    ,label
+        $query = $this->dbC->query("
+                SELECT *
                 FROM lst_item_type
             ");
-        while ( $row = $result->fetch_assoc() ) {
-            $label = $row['label'];
-            $id = $row['id'];
-            $list[$label] = $id;
+        while ( $result = $query->fetch_assoc() ) {
+            array_push($list, array(
+                    'id'    => $result['id']
+                    ,'label'    => $result['label']
+                    ,'description'  => $result['description']
+                ));
         }
-        $this->model->data('list', $list);
-        $GLOBALS['cache']->set('itemType_IDLabel_list', $list, 3600*24);
-        return false;
+        $GLOBALS['cache']->set('itemType_list', $list, 3600*24);
     }
-    $this->model->data('list', $itList);
-
+    $this->model->data('list', $list);
 } //generateList
 
 
 
-public function generateDescriptionList () {
-
-    $itList = $GLOBALS['cache']->get('itemType_labelDescription_list');
-    if ( $itList == null ) {
-        $list = array();
-        $result = $this->dbC->query("
-                SELECT label
-                    ,description
-                FROM lst_item_type
-            ");
-        while ( $row = $result->fetch_assoc() ) {
-            $label = $row['label'];
-            $description = $row['description'];
-            $list[$label] = $description;
-        }
-        $this->model->data('list', $list);
-        $GLOBALS['cache']->set('itemType_labelDescription_list', $list, 3600*24);
-        return false;
-    }
-    $this->model->data('list', $itList);
-
-} //generateDescriptionList
 
 
 }

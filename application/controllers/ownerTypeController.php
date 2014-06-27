@@ -21,49 +21,42 @@ public function __construct ($model) {
 
 
 
+
 public function generateList () {
-    $otList = $GLOBALS['cache']->get('ownerType_IDLabel_list');
-    if ( $otList == null ) {
+    $list = $GLOBALS['cache']->get('ownerType_list');
+    if ( $list == null ) {
         $list = array();
-        $result = $this->dbC->query("
-                SELECT id
-                    ,ownership_label
+        $query = $this->dbC->query("
+                SELECT *
                 FROM lst_ownership_type
             ");
-        while ( $row = $result->fetch_assoc() ) {
-            $id = $row['id'];
-            $label = ucfirst($row['ownership_label']);
-            $list[$label] = $id;
+        while ( $result = $query->fetch_assoc() ) {
+            array_push($list, array(
+                    'id'    => $result['id']
+                    ,'label'    => $result['ownership_label']
+                    ,'description'  => $result['ownership_description']
+                ));
         }
-        $this->model->data('list', $list);
-        $GLOBALS['cache']->set('ownerType_IDLabel_list', $list, 3600*24);
-        return false;
+        $GLOBALS['cache']->set('ownerType_list', $list, 3600*24);
     }
-    $this->model->data('list', $otList);
+    $this->model->data('list', $list);
 } //generateList
 
 
 
-public function generateDescriptionList () {
-    $otList = $GLOBALS['cache']->get('ownerType_labelDescription_list');
-    if ( $otList == null ) {
-        $list = array();
-        $result = $this->dbC->query("
-                SELECT ownership_label
-                    ,ownership_description
-                FROM lst_ownership_type
-            ");
-        while ( $row = $result->fetch_assoc() ) {
-            $label = $row['ownership_label'];
-            $description = $row['ownership_description'];
-            $list[$label] = $description;
-        }
-        $this->model->data('list', $list);
-        $GLOBALS['cache']->set('ownerType_labelDescription_list', $list, 3600*24);
-        return false;
-    }
-    $this->model->data('list', $otList);
-} //generateDescriptionList
+
+
+public function decodeID ($id) {
+    $query = $this->dbC->query("
+            SELECT
+                ownership_label
+            FROM lst_ownership_type
+            WHERE
+                id = $id
+        ");
+    $result = $query->fetch_assoc();
+    return $result['ownership_label'];
+} //decodeID
 
 
 

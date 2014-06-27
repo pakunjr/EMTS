@@ -26,12 +26,17 @@ var jQueryUIFx = function () {
      * Make the datepicker working
      */
     if ( $('.datepicker').length > 0 ) {
-        $('.datepicker').datepicker({
-            changeMonth: true
-            ,changeYear: true
-            ,dateFormat: 'yy-mm-dd'
-        }).val('0000-00-00').keydown(function () {
-            return false;
+        $('.datepicker').each(function () {
+            var $this = $(this);
+            $this.datepicker({
+                changeMonth: true
+                ,changeYear: true
+                ,dateFormat: 'yy-mm-dd'
+            }).keydown(function () {
+                return false;
+            });
+
+            if ( $this.val() == '' ) $this.val('0000-00-00');
         });
     } //if
 }; //jQueryUIFx
@@ -131,7 +136,14 @@ var searchFunctions = function () {
              * Clear search box if `esc` key was pressed
              */
             var pressedKey = e.keyCode || e.which;
-            if ( pressedKey == 27 ) $searchBox.val('');
+            if ( pressedKey == 27 ) {
+                $searchBox.val('');
+                $result.val('');
+            }
+
+            $this.css({
+                'left': $searchBox.offset().left + 'px'
+            });
 
 
             clearTimeout(typingTimer);
@@ -144,15 +156,46 @@ var searchFunctions = function () {
                     $this.load(dataURL+forURL, function () {
 
                         if ( $this.find('.search-data').length > 0 ) {
-                            $this.find('.search-data').click(function () {
+                            $this.find('.search-data').each(function () {
+
+
                                 var $dataThis = $(this)
                                     ,dataIdentifier = $dataThis.find('.search-result-identifier').val()
                                     ,dataLabel = $dataThis.find('.search-result-label').html();
 
-                                if ( confirm('Set '+dataLabel+'?') ) {
-                                    $searchBox.val(dataLabel);
-                                    $result.val(dataIdentifier);
-                                }
+                                dataHighlighter($dataThis);
+                                $dataThis.click(function () {
+                                    popAlert('confirm', {
+                                        'message': 'Set this as your choice?<br />'
+                                            +'Data: '+dataLabel
+                                        ,'action': function () {
+                                            $searchBox.val(dataLabel);
+                                            $result.val(dataIdentifier);
+
+                                            /**
+                                             * Search box canceller
+                                             */
+                                            $searchBox.after('<img class="search-result-cancel search-result-cancel-icon" />');
+                                            var $cancelButton = $searchBox.next('.search-result-cancel');
+                                            $cancelButton.css({
+                                                'margin-top': (0 - $cancelButton.height() / 2) + 5 + 'px'
+                                                ,'left': ($searchBox.offset().left - ($cancelButton.width() / 2)) + 5 + 'px'
+                                            }).click(function () {
+                                                popAlert('confirm', {
+                                                    'message': 'Cancel selected search?<br />'
+                                                        +'Data: '
+                                                        +$searchBox.val()
+                                                    ,'action': function () {
+                                                        $searchBox.val('');
+                                                        $result.val('');
+                                                        $cancelButton.remove();
+                                                    }
+                                                });
+                                            });
+                                        }
+                                    });
+                                });
+
                             });
 
                             $this.removeClass('hidden');
@@ -170,10 +213,54 @@ var searchFunctions = function () {
                     } else $this.addClass('hidden');
                 });
 
-            }, typingInterval); //setTimeout
+            }, typingInterval); //setTimeout - typingTimer
         });
     });
 }; //searchFunctions
+
+
+
+
+
+/**
+ * Numeric boxes
+ */
+var numerics = function () {
+    if ( $('.numeric').length < 1 ) return false;
+
+    $('.numeric').keyup(function () {
+        var $this = $(this)
+            ,thisVal = $this.val();
+
+        if ( thisVal != parseFloat(thisVal) )
+            $this.val(parseFloat(thisVal));
+    });
+}; //numerics
+
+
+
+
+/**
+ * Execute all the initializer functions
+ */
+$(document).ready(function () {
+    navigationMenu();
+    jQueryUIFx();
+    instructionalNotes();
+    searchFunctions();
+    numerics();
+}); //ready
+
+
+/**
+ * ====================================================================
+ * End initializer functions
+ * ====================================================================
+ */
+
+
+
+
 
 
 
@@ -183,11 +270,199 @@ var searchFunctions = function () {
 
 
 /**
- * Execute all the functions
+ * Alert functions
  */
-$(document).ready(function () {
-    navigationMenu();
-    jQueryUIFx();
-    instructionalNotes();
-    searchFunctions();
-}); //ready
+var popAlert = function ( alertType, alertOptions ) {
+
+    if ( $('.popup-alert-container').length > 0 )
+        popAlertClose();
+
+    /**
+     * Set default options and override the defaults
+     * with the values given in the parameter
+     */
+    var defaultOptions = $.extend({
+            'message': 'No message set for this popup alert.'
+            ,'action': function () {
+                alert('There is no set function.');
+            }
+        }, alertOptions)
+        ,popupHTML = null;
+
+    /** 
+     * Generate HTML for the popup basing on the
+     * parameters given
+     */
+    if ( alertType == 'alert' ) {
+        popupHTML = '<div class="popup-alert-container hidden">'
+            +'<div class="popup-alert-content">'
+            +'<div class="popup-alert-message">'
+            +'<small>Information</small>'
+            +'<hr />'
+            +defaultOptions['message']
+            +'</div>'
+            +'<div class="popup-alert-buttons">'
+            +'<input class="pa-btn-close btn-blue" type="button" value="Close" />'
+            +'</div>'
+            +'</div>'
+            +'</div>';
+    } else if ( alertType == 'confirm' ) {
+        popupHTML = '<div class="popup-alert-container hidden">'
+            +'<div class="popup-alert-content">'
+            +'<div class="popup-alert-message">'
+            +'<small>Confirmation</small>'
+            +'<hr />'
+            +defaultOptions['message']
+            +'</div>'
+            +'<div class="popup-alert-buttons">'
+            +'<input class="pa-btn-approve btn-green" type="button" value="Approve" />'
+            +'<input class="pa-btn-deny btn-red" type="button" value="Deny" />'
+            +'</div>'
+            +'</div>'
+            +'</div>';
+    } else if ( alertType == 'prompt' ) {
+        //No application yet
+    } else {
+        //Just do nothing for a while
+    }
+
+    /**
+     * Setup the popup alert
+     */
+    $('body').append(popupHTML);
+    var $pContainer = $('.popup-alert-container')
+        ,$pContent = $pContainer.children('.popup-alert-content')
+        ,$pMessage = $pContent.children('.popup-alert-message')
+        ,$pButtons = $pContent.children('.popup-alert-buttons');
+
+
+
+    /**
+     * Setup the visuals before displaying
+     * the popup to the viewer
+     */
+    $pContainer.css({
+        'width': $(window).width() + 'px'
+        ,'height': $(window).height() + 'px'
+        ,'position': 'fixed'
+        ,'top': '0px'
+        ,'left': '0px'
+        ,'z-index': '1000'
+        ,'background': '#000'
+        ,'background': 'rgba(0, 0, 0, 0.75)'
+        ,'text-align': 'center'
+    });
+
+    $pContent.css({
+        'display': 'inline-block'
+        ,'max-width': '400px'
+        ,'margin-top':
+            ($(window).height() / 2)
+            - ($pContent.height() / 2)
+            + 'px'
+        ,'padding': '15px 20px'
+        ,'border-radius': '7px'
+        ,'border': '1px solid #ccc'
+        ,'background': '#fff'
+        ,'text-align': 'left'
+        ,'font-size': '0.9em'
+    });
+
+
+    var popupRendering = function () {
+        $pContainer.css({
+            'width': $(window).width() + 'px'
+            ,'height': $(window).height() + 'px'
+        });
+
+        $pContent.css({
+            'margin-top':
+                ($(window).height() / 2)
+                - ($pContent.height() / 2)
+                + 'px'
+        });
+    }; //popupRendering
+
+
+    $(window).on('resize', function () {
+        popupRendering();
+    });
+
+
+    $pMessage.css({
+        'display': 'block'
+        ,'margin': '0px 0px 20px 0px'
+    });
+
+
+    $pButtons.css({
+        'display': 'block'
+        ,'text-align': 'center'
+    });
+
+
+    $pContainer.fadeIn(250, function () {
+
+        popupRendering();
+
+        /**
+         * Button functions or scripts
+         */
+        if ( alertType == 'alert' ) {
+            
+            $('.pa-btn-close').click(function () { popAlertClose(); });
+            
+        } else if ( alertType == 'confirm' ) {
+
+            $('.pa-btn-approve').click(function () {
+                defaultOptions['action']();
+                popAlertClose();
+            });
+
+            $('.pa-btn-deny').click(function () { popAlertClose(); });
+
+        } else {
+            //do nothing
+        }
+    });
+    popupRendering();
+
+
+
+}; //popAlert
+
+
+
+
+var popAlertClose = function () {
+    if ( $('.popup-alert-container').length < 1 ) return false;
+
+    $('.popup-alert-container').each(function () {
+        var $this = $(this);
+        $this.fadeOut(150, function () {
+            $this.remove();
+        });
+    });
+}; //popAlertClose
+
+
+
+
+
+
+
+
+/**
+ * Highlighter
+ */
+var dataHighlighter = function ($data) {
+    $data.hover(function () {
+        $data.addClass('highlighted');
+    }, function () {
+        $data.removeClass('highlighted');
+    });
+}; //dataHighlighter
+
+
+
+
