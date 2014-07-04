@@ -33,7 +33,7 @@ public function renderForm ($echo=false) {
                 ,'method'   => 'post'
                 ,'enctype'  => 'multipart/form-data'
             ))
-            .$lf->text(array('id'=>'username'))
+            .$lf->text(array('id'=>'username','label'=>'username / email address','placeholder'=>'username or email address'))
             .$lf->password(array('id'=>'password','auto_line_break'=>true))
             .$lf->submit(array('value'=>'Login'))
             .$lf->closeForm();

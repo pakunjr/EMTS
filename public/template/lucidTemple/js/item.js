@@ -72,13 +72,40 @@ $(document).ready(function () {
 
 
     /**
+     * If package is set, disable the date of purchase
+     */
+    var $DOPBox = $('#single-item-date-purchase')
+        ,$PS = $('#single-item-package-search-id')
+        ,$PSBox = $('#single-item-package-search');
+
+    if ( $PS.val() != '' ) $DOPBox.prop('disabled', true);
+    else $DOPBox.prop('disabled', false);
+
+    $PSBox.on('change keyup focusout', function () {
+        if ( $PS.val() != '' ) $DOPBox.prop('disabled', true);
+        else $DOPBox.prop('disabled', false);
+    });
+
+
+
+
+
+    /**
      * Item type script
      */
-    var $itBox = $('#single-item-type');
+    var $itBox = $('#single-item-type')
+        ,$specForm = $('#single-item-specification-form');
+
+    $itBox.children('option').each(function () {
+        var $this = $(this);
+        if ( $this.is(':selected')
+            && $this.html() == 'Devices'
+            && !$specForm.is(':visible') )
+            $specForm.slideDown(250);
+    });
 
     $itBox.change(function () {
-        var selectedType = null
-            ,$specForm = $('#single-item-specification-form');
+        var selectedType = null;
 
         $itBox.children('option').each(function () {
             var $this = $(this);
@@ -110,16 +137,36 @@ $(document).ready(function () {
 
             dataHighlighter($this);
             $this.click(function () {
-                popAlert('confirm', {
-                    'message': 'Do you want to check the item information of <br />'
-                        +'<div style="display: block; margin-top: 10px; padding: 15px; border-radius: 15px; border: 1px solid #ccc;">'
-                        +itemName
-                        +'</div>'
-                    ,'action': function () {
-                        window.location = itemURL;
-                    }
-                });
+                window.location = itemURL;
             });
+        });
+    }
+
+
+
+
+
+
+    /**
+     * Deleting an item / archiving it in the system
+     */
+    if ( $('.delete-button').length > 0 ) {
+        $('.delete-button').click(function () {
+            var $this = $(this)
+                ,url = $this.attr('href')
+                ,$infoBlock = $this.closest('tr').children('td:first-child');
+
+            popAlert('confirm', {
+                'message': 'Are you sure you want to delete this item?'
+                +'<span style="display: block; padding: 10px 15px; border-radius: 5px; border: 1px solid #ccc;">'
+                +$infoBlock.html()
+                +'</span>'
+                ,'action': function () {
+                    window.location = url;
+                }
+            });
+
+            return false;
         });
     }
 

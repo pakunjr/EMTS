@@ -58,10 +58,8 @@ public function renderPage ($controller, $action=null, $extra=null) {
 
 
                 case 'save':
-                    $GLOBALS['pageView']->getHeader();
                     $results = $this->controller->createItem($_POST);
                     $this->renderSaveResults($results, true);
-                    $GLOBALS['pageView']->getFooter();
                     break;
 
 
@@ -91,7 +89,20 @@ public function renderPage ($controller, $action=null, $extra=null) {
 
 
         case 'update_item':
-            $GLOBALS['pageView']->pageError('underconstruction');
+            if ( $action == 'save' ) {
+                $result = $this->controller->updateItem($_POST);
+                $this->renderUpdateResults($result);
+            } else {
+                $GLOBALS['pageView']->getHeader();
+                $this->renderForm('update', true, $action);
+                $GLOBALS['pageView']->getFooter();
+            }
+            break;
+
+
+
+        case 'delete_item':
+            $this->controller->archiveItem($action);
             break;
 
 
@@ -122,7 +133,17 @@ public function renderPage ($controller, $action=null, $extra=null) {
 /**
  * Generate and return single item form
  */
-public function renderForm ($action='create', $echo=false) {
+public function renderForm ($action='create', $echo=false, $id=null) {
+    if ( $action == 'create' )
+        $formHead = '<b style="font-size: 1.5em;">New Item</b><hr />';
+    else if ( $action == 'update' )
+        $formHead = '<b style="font-size: 1.5em;">Update Item</b><hr />';
+
+    $errM = new errorModel();
+    $errC = new errorController($errM);
+
+    $dbM = new databaseModel();
+    $dbC = new databaseController($dbM);
 
     $fcs = new form(array(
             'auto_line_break'   => true
@@ -137,169 +158,362 @@ public function renderForm ($action='create', $echo=false) {
 
     $ownerTypeM = new ownerTypeModel();
     $ownerTypeV = new ownerTypeView($ownerTypeM);
+    $ownerTypeC = new ownerTypeController($ownerTypeM);
+
+    $ownshpM = new ownershipModel();
+    $ownshpC = new ownershipController($ownshpM);
+
+    $packageM = new packageModel();
+    $packageC = new packageController($packageM);
 
 
-    if ( $action == 'create' ) {
-        $singleItemForm = '<div id="form-container-single">'
-            .$fcs->openForm(array(
-                'id'    => 'new-single-item-form'
-                ,'method'   => 'post'
-                ,'action'   => URL_BASE.'items/new_item/save/'
-                ,'enctype'  => 'multipart/form-data'
-            ))
-            .$fcs->openFieldset(array('legend'=>'Single Item Form'))
-            .'<div class="row">'
-                .'<span class="column">'
-                .$fcs->text(array('id'=>'single-item-serial-no','label'=>'Serial No.'))
-                .$fcs->text(array('id'=>'single-item-model-no','label'=>'Model No.'))
-                .$fcs->text(array('id'=>'single-item-quantity','label'=>'Quantity','class'=>'numeric','value'=>'1'))
-                .$fcs->text(array('id'=>'single-item-quantity-unit','label'=>'Quantity-Unit','value'=>'pc.'))
-                .'</span><!-- .column -->'
 
 
-                .'<span class="column">'
-                .$fcs->text(array('id'=>'single-item-name','label'=>'Item Name'))
-                .$fcs->select(array('id'=>'single-item-state','label'=>'Item State','select_options'=>$itemStateV->generateSelectOptions()))
-                .'<div class="note" data-for="single-item-state">'.$itemStateV->generateNote().'</div>'
-                .$fcs->textarea(array('id'=>'single-item-description','label'=>'Item Description'))
-                .'<div class="note" data-for="single-item-description">'
-                    .'Please indicate the specifications of the item in the description box.<br />'
-                    .'<hr />'
-                    .'Examples are given below:<br /><small>(Please note that these are just examples)</small><br /><br />'
+    if ( $action == 'update' ) {
 
-                    .'<u>for a Thumbdrive:</u>'
-                    .'<div style="margin-top: 5px; padding-left: 10px;">'
-                        .'Color: Red and Black<br />'
-                        .'Brand: SanDisk<br />'
-                        .'Capacity: 16 GB'
-                    .'</div><br />'
+        if ( $id === null ) {
+            echo 'Error: Failed to update the item, no passed ID.';
+            $errC->logError('Failed to show update form, no item ID passed');
+            return false;
+        }
+        $action = URL_BASE.'items/update_item/save/';
+        $itemID = $id;
 
-                    .'<u>for a Bond Paper:</u>'
-                    .'<div style="margin-top: 5px; padding-left: 10px;">'
-                        .'Texture / Color: Plain white<br />'
-                        .'Size: A4<br />'
-                        .'300 pcs.'
-                    .'</div><br />'
+        $results = $dbC->PDOStatement(array(
+            'query' => "SELECT
+                    items.item_serial_no
+                    ,items.item_model_no
+                    ,items.item_name
+                    ,items.item_type
+                    ,items.item_state
+                    ,items.item_description
+                    ,items.quantity
+                    ,items.quantity_unit
+                    ,items.date_of_purchase
+                    ,items.package_id
 
-                    .'<u>for an Office Table</u>'
-                    .'<div style="margin-top: 5px; padding-left: 10px;">'
-                        .'Texture / Color: Wooden brown<br />'
-                        .'Dimensions: 24\'\' H x 24\'\' W x 36\'\' D<br />'
-                        .'No. of Drawers: 1 long and 3 short'
-                    .'</div>'
-                .'</div>'
-                .'</span><!-- .column -->'
+                    ,specs.id AS specsID
+                    ,specs.processor
+                    ,specs.video
+                    ,specs.display
+                    ,specs.webcam
+                    ,specs.audio
+                    ,specs.network
+                    ,specs.usb_ports
+                    ,specs.memory
+                    ,specs.storage
+                    ,specs.os
+                    ,specs.software
+                FROM tbl_items AS items
+                LEFT JOIN tbl_items_specification AS specs ON items.item_id = specs.item_id
+                WHERE items.item_id = ?
+                LIMIT 1"
+            ,'values'   => array(array('int', $itemID))
+            ));
+        $row = $results[0];
 
+        $itemSerialNo = $row['item_serial_no'];
+        $itemModelNo = $row['item_model_no'];
+        $itemName = $row['item_name'];
+        $itemType = $row['item_type'];
+        $itemState = $row['item_state'];
+        $itemDescription = $row['item_description'];
+        $quantity = $row['quantity'];
+        $quantityUnit = $row['quantity_unit'];
+        $dateOfPurchase = $row['date_of_purchase'];
+        $packageID = $row['package_id'];
+        $packageName = $packageID != '' ?
+            $packageC->getPackageName($packageID) : '';
 
-                .'<span class="column">'
-                .$fcs->text(array('id'=>'single-item-date-purchase','label'=>'Date of Purchase','class'=>'datepicker'))
-                .$fcs->select(array('id'=>'single-item-type','label'=>'Item Type','select_options'=>$itemTypeV->generateSelectOptions()))
-                .'<div class="note" data-for="single-item-type">'.$itemTypeV->generateNote().'</div>'
-                .$fcs->hidden(array('id'=>'single-item-package-search-id'))
-                .$fcs->text(array('id'=>'single-item-package-search','label'=>'Search Package'))
-                .'<div class="note" data-for="single-item-package-search">If this item belongs to a package, search the package through here, if the package is missing, please add it using the <a href="'.URL_BASE.'packages/new/">package form</a>.<br /><br />Press `Esc` key to automatically clear the search box.</div>'
-                .'<div class="search-results hidden" data-search="single-item-package-search" data-result="single-item-package-search-id" data-url="'.URL_BASE.'packages/search/"></div>'
-                .'</span><!-- .column -->'
-            .'</div><!-- .row -->'
-            .$fcs->closeFieldset()
+        $itemSpecsID = $row['specsID'];
+        $itemSpecsProcessor = $row['processor'];
+        $itemSpecsVideo = $row['video'];
+        $itemSpecsDisplay = $row['display'];
+        $itemSpecsWebcam = $row['webcam'];
+        $itemSpecsAudio = $row['audio'];
+        $itemSpecsNetwork = $row['network'];
+        $itemSpecsUSBPorts = $row['usb_ports'];
+        $itemSpecsMemory = $row['memory'];
+        $itemSpecsStorage = $row['storage'];
+        $itemSpecsOS = $row['os'];
+        $itemSpecsSoftware = $row['software'];
 
+        $ownshpResult = $dbC->PDOStatement(array(
+            'query' => "SELECT
+                    ownership_id
+                    ,owner_id
+                    ,owner_type
+                    ,date_of_possession
+                FROM tbl_ownerships
+                WHERE
+                    item_id = ?
+                    AND date_of_release = ?
+                LIMIT 1"
+            ,'values'    => array(
+                    array('int', $itemID)
+                    ,'0000-00-00'
+                )
+            ));
+        $ownshpResult = count($ownshpResult) > 0 ?
+            $ownshpResult[0] : null;
 
-            /**
-             * Item specification
-             */
-            .$fcs->openFieldset(array('id'=>'single-item-specification-form','class'=>'hidden','legend'=>'Item Specifications'))
-            .'<div class="row">'
-                .'<span class="column">'
-                .$fcs->text(array('id'=>'item-specs-processor','label'=>'Processor'))
-                .$fcs->text(array('id'=>'item-specs-video','label'=>'Video'))
-                .$fcs->text(array('id'=>'item-specs-display','label'=>'Display'))
-                .$fcs->text(array('id'=>'item-specs-webcam','label'=>'Webcam'))
-                .$fcs->text(array('id'=>'item-specs-audio','label'=>'Audio'))
-                .'</span>'
-
-
-                .'<span class="column">'
-                .$fcs->text(array('id'=>'item-specs-network','label'=>'Network'))
-                .$fcs->text(array('id'=>'item-specs-usbports','label'=>'USB Ports'))
-                .$fcs->text(array('id'=>'item-specs-memory','label'=>'Memory'))
-                .$fcs->textarea(array('id'=>'item-specs-storage','label'=>'Storage'))
-                .'</span>'
-
-
-                .'<span class="column">'
-                .$fcs->text(array('id'=>'item-specs-os','label'=>'Operating System'))
-                .$fcs->textarea(array('id'=>'item-specs-software','label'=>'Other Software'))
-                .'</span>'
-            .'</div>'
-            .$fcs->closeFieldset()
-
-
-            /**
-             * Ownership type
-             */
-            .$fcs->openFieldset(array('legend'=>'Owner Details'))
-            .'<div class="row">'
-                .'<span class="column">'
-                .$fcs->select(array('id'=>'owner-type','label'=>'Owner Type','select_options'=>$ownerTypeV->generateSelectOptions()))
-                .'<div class="note" data-for="owner-type">'.$ownerTypeV->generateNote().'</div>'
-                .'</span>'
-            .'</div>'
-
-            /**
-             * Employee form
-             */
-            .'<div id="owner-type-employee-form" class="row owner-type-form">'
-                .'<span class="column">'
-                .$fcs->hidden(array('id'=>'person-search-id'))
-                .$fcs->text(array('id'=>'person-search','label'=>'Search Owner'))
-                .'<div class="note" data-for="person-search">Type in either firstname, middlename, or lastname and a dropdown list will show up matching your search query of the person. If the person doesn\'t exists in the system, please use this <a href="'.URL_BASE.'persons/registration" target="_blank">employee registration form</a>.<br /><br />Press Esc key to automatically clear the search box.</div>'
-                .'<div class="search-results hidden" data-search="person-search" data-url="'.URL_BASE.'persons/search_employee/" data-result="person-search-id"></div>'
-                .'</span>'
-            .'</div>'
-
-            /**
-             * Department form
-             */
-            .'<div id="owner-type-department-form" class="row owner-type-form hidden">'
-                .'<span class="column">'
-                .$fcs->hidden(array('id'=>'department-search-id'))
-                .$fcs->text(array('id'=>'department-search','label'=>'Search Department'))
-                .'<div class="note" data-for="department-search">Type in either the acronym of the department, or a part of the name of the department and a dropdown list will show up matching your search query of the department.<br /><br />Press Esc key to automatically clear the search box.</div>'
-                .'<div class="search-results hidden" data-search="department-search" data-url="'.URL_BASE.'departments/search/" data-result="department-search-id"></div>'
-                .'</span>'
-            .'</div>'
-
-            /**
-             * Guest form
-             */
-            .'<div id="owner-type-guest-form" class="row owner-type-form hidden">'
-                .'<span class="column">'
-                .$fcs->hidden(array('id'=>'guest-search-id'))
-                .$fcs->text(array('id'=>'guest-search', 'label'=>'Search Guest'))
-                .'<div class="note" data-for="guest-search">Type in either firstname, middlename, or lastname and a dropdown list will show up matching your search query of the person. If the person doesn\'t exists in the system, please use this <a href="'.URL_BASE.'persons/registration/guest" target="_blank">guest registration form</a>.<br /><br />Press Esc key to automatically clear the search box.</div>'
-                .'<div class="search-results hidden" data-search="guest-search" data-url="'.URL_BASE.'persons/search_guest/" data-result="guest-search-id"></div>'
-                .'</span>'
-            .'</div>'
+        if ( $ownshpResult != null ) {
+            $ownershipID = $ownshpResult['ownership_id'];
+            $ownerID = $ownshpResult['owner_id'];
+            $ownerType = $ownshpResult['owner_type'];
+            $ownerTypeLabel = $ownerTypeC->decodeID($ownerType);
+            $ownerName = $ownshpC->getOwnerName($ownershipID);
+        } else {
+            $ownershipID = '';
+            $ownerID = '';
+            $ownerType = $ownerTypeC->decodeLabel('None');
+            $ownerTypeLabel = '';
+            $ownerName = '';
+        }
 
 
-            .$fcs->text(array('id'=>'owner-date-of-possession','class'=>'datepicker','label'=>'Date of Possession','value'=>date('Y-m-d')))
 
+        $ownerEmpID = $ownerTypeLabel == 'Employee' ?
+            $ownerID : '';
+        $ownerEmpName = $ownerTypeLabel == 'Employee' ?
+            $ownerName : '';
 
-            .$fcs->closeFieldset()
-            .$fcs->submit(array('value'=>'Save item','auto_line_break'=>false))
-            .$fcs->closeForm()
-            .'</div>'
-            .'<script type="text/javascript" src="'.URL_TEMPLATE.'js/item.js"></script>';
+        $ownerDeptID = $ownerTypeLabel == 'Department' ?
+            $ownerID : '';
+        $ownerDeptName = $ownerTypeLabel == 'Department' ?
+            $ownerName : '';
+
+        $ownerGuestID = $ownerTypeLabel == 'Guest' ?
+            $ownerID : '';
+        $ownerGuestName = $ownerTypeLabel == 'Guest' ?
+            $ownerName : '';
+
+        $dateOfPossession = $ownshpResult['date_of_possession'];
+
+        $submitBtnValue = 'Update Item';
+
     } else {
-        $GLOBALS['pageView']->pageError('404');
-        return false;
+
+        $action = URL_BASE.'items/new_item/save/';
+
+        $itemID = '';
+
+        $itemSerialNo = '';
+        $itemModelNo = '';
+        $itemName = '';
+        $itemType = '';
+        $itemState = '';
+        $itemDescription = '';
+        $quantity = '1';
+        $quantityUnit = 'pc.';
+        $dateOfPurchase = date('Y-m-d');
+        $packageID = '';
+        $packageName = '';
+
+        $itemSpecsID = '';
+        $itemSpecsProcessor = '';
+        $itemSpecsVideo = '';
+        $itemSpecsDisplay = '';
+        $itemSpecsWebcam = '';
+        $itemSpecsAudio = '';
+        $itemSpecsNetwork = '';
+        $itemSpecsUSBPorts = '';
+        $itemSpecsMemory = '';
+        $itemSpecsStorage = '';
+        $itemSpecsOS = '';
+        $itemSpecsSoftware = '';
+
+        $ownershipID = '';
+        $ownerType = '';
+        $ownerEmpID = '';
+        $ownerEmpName = '';
+        $ownerDeptID = '';
+        $ownerDeptName = '';
+        $ownerGuestID = '';
+        $ownerGuestName = '';
+        $dateOfPossession = '';
+
+        $submitBtnValue = 'Save Item';
+
     }
+
+
+
+
+
+    $singleItemForm = $formHead.'<div id="form-container-single">'
+        .$fcs->openForm(array(
+            'id'    => 'new-single-item-form'
+            ,'method'   => 'post'
+            ,'action'   => $action
+            ,'enctype'  => 'multipart/form-data'
+        ))
+        .$fcs->hidden(array('id'=>'item-id','value'=>$itemID))
+        .$fcs->openFieldset(array('legend'=>'Item Information'))
+        .'<div class="row">'
+            .'<span class="column">'
+            .$fcs->text(array('id'=>'single-item-serial-no','label'=>'Serial No.','value'=>$itemSerialNo))
+            .$fcs->text(array('id'=>'single-item-model-no','label'=>'Model No.','value'=>$itemModelNo))
+            .$fcs->text(array('id'=>'single-item-quantity','label'=>'Quantity','class'=>'numeric','value'=>$quantity))
+            .$fcs->text(array('id'=>'single-item-quantity-unit','label'=>'Quantity-Unit','value'=>$quantityUnit))
+            .'</span><!-- .column -->'
+
+
+            .'<span class="column">'
+            .$fcs->text(array('id'=>'single-item-name','label'=>'Item Name','value'=>$itemName))
+            .$fcs->select(array('id'=>'single-item-state','label'=>'Item State','select_options'=>$itemStateV->generateSelectOptions(),'default_option'=>$itemState))
+            .'<div class="note" data-for="single-item-state">'.$itemStateV->generateNote().'</div>'
+            .$fcs->textarea(array('id'=>'single-item-description','label'=>'Item Description','value'=>$itemDescription))
+            .'<div class="note" data-for="single-item-description">'
+                .'Please indicate the specifications of the item in the description box.<br />'
+                .'<hr />'
+                .'Examples are given below:<br /><small>(Please note that these are just examples)</small><br /><br />'
+
+                .'<u>for a Thumbdrive:</u>'
+                .'<div style="margin-top: 5px; padding-left: 10px;">'
+                    .'Color: Red and Black<br />'
+                    .'Brand: SanDisk<br />'
+                    .'Capacity: 16 GB'
+                .'</div><br />'
+
+                .'<u>for a Bond Paper:</u>'
+                .'<div style="margin-top: 5px; padding-left: 10px;">'
+                    .'Texture / Color: Plain white<br />'
+                    .'Size: A4<br />'
+                    .'300 pcs.'
+                .'</div><br />'
+
+                .'<u>for an Office Table</u>'
+                .'<div style="margin-top: 5px; padding-left: 10px;">'
+                    .'Texture / Color: Wooden brown<br />'
+                    .'Dimensions: 24\'\' H x 24\'\' W x 36\'\' D<br />'
+                    .'No. of Drawers: 1 long and 3 short'
+                .'</div>'
+            .'</div>'
+            .'</span><!-- .column -->'
+
+
+            .'<span class="column">'
+            .$fcs->text(array('id'=>'single-item-date-purchase','label'=>'Date of Purchase','class'=>'datepicker','value'=>$dateOfPurchase))
+            .$fcs->select(array('id'=>'single-item-type','label'=>'Item Type','select_options'=>$itemTypeV->generateSelectOptions(),'default_option'=>$itemType))
+            .'<div class="note" data-for="single-item-type">'.$itemTypeV->generateNote().'</div>'
+            .$fcs->hidden(array('id'=>'single-item-package-search-id','value'=>$packageID))
+            .$fcs->text(array('id'=>'single-item-package-search','label'=>'Search Package','value'=>$packageName))
+            .'<div class="note" data-for="single-item-package-search">If this item belongs to a package, search the package through here, if the package is missing, please add it using the <a href="'.URL_BASE.'packages/new/">package form</a>.<br /><br />Press `Esc` key to automatically clear the search box.</div>'
+            .'<div class="search-results hidden" data-search="single-item-package-search" data-result="single-item-package-search-id" data-url="'.URL_BASE.'packages/search/"></div>'
+            .'</span><!-- .column -->'
+        .'</div><!-- .row -->'
+        .$fcs->closeFieldset()
+
+
+        /**
+         * Item specification
+         */
+        .$fcs->openFieldset(array('id'=>'single-item-specification-form','class'=>'hidden','legend'=>'Item Specifications'))
+        .'<div class="row">'
+            .'<span class="column">'
+            .$fcs->text(array('id'=>'item-specs-processor','label'=>'Processor','value'=>$itemSpecsProcessor))
+            .$fcs->text(array('id'=>'item-specs-video','label'=>'Video','value'=>$itemSpecsVideo))
+            .$fcs->text(array('id'=>'item-specs-display','label'=>'Display','value'=>$itemSpecsDisplay))
+            .$fcs->text(array('id'=>'item-specs-webcam','label'=>'Webcam','value'=>$itemSpecsWebcam))
+            .$fcs->text(array('id'=>'item-specs-audio','label'=>'Audio','value'=>$itemSpecsAudio))
+            .'</span>'
+
+
+            .'<span class="column">'
+            .$fcs->text(array('id'=>'item-specs-network','label'=>'Network','value'=>$itemSpecsNetwork))
+            .$fcs->text(array('id'=>'item-specs-usbports','label'=>'USB Ports','value'=>$itemSpecsUSBPorts))
+            .$fcs->text(array('id'=>'item-specs-memory','label'=>'Memory','value'=>$itemSpecsMemory))
+            .$fcs->textarea(array('id'=>'item-specs-storage','label'=>'Storage','value'=>$itemSpecsStorage))
+            .'</span>'
+
+
+            .'<span class="column">'
+            .$fcs->text(array('id'=>'item-specs-os','label'=>'Operating System','value'=>$itemSpecsOS))
+            .$fcs->textarea(array('id'=>'item-specs-software','label'=>'Other Software','value'=>$itemSpecsSoftware))
+            .'</span>'
+        .'</div>'
+        .$fcs->closeFieldset()
+
+
+        /**
+         * Ownership type
+         */
+        .$fcs->openFieldset(array('legend'=>'Owner Details'))
+        .$fcs->hidden(array('id'=>'ownership-id','value'=>$ownershipID))
+        .'<div class="row">'
+            .'<span class="column">'
+            .$fcs->select(array('id'=>'owner-type','label'=>'Owner Type','select_options'=>$ownerTypeV->generateSelectOptions(),'default_option'=>$ownerType))
+            .'<div class="note" data-for="owner-type">'.$ownerTypeV->generateNote().'</div>'
+            .'</span>'
+        .'</div>'
+
+        /**
+         * Employee form
+         */
+        .'<div id="owner-type-employee-form" class="row owner-type-form">'
+            .'<span class="column">'
+            .$fcs->hidden(array('id'=>'person-search-id','value'=>$ownerEmpID))
+            .$fcs->text(array('id'=>'person-search','label'=>'Search Owner','value'=>$ownerEmpName))
+            .'<div class="note" data-for="person-search">Type in either firstname, middlename, or lastname and a dropdown list will show up matching your search query of the person. If the person doesn\'t exists in the system, please use this <a href="'.URL_BASE.'persons/registration" target="_blank">employee registration form</a>.<br /><br />Press Esc key to automatically clear the search box.</div>'
+            .'<div class="search-results hidden" data-search="person-search" data-url="'.URL_BASE.'persons/search_employee/" data-result="person-search-id"></div>'
+            .'</span>'
+        .'</div>'
+
+        /**
+         * Department form
+         */
+        .'<div id="owner-type-department-form" class="row owner-type-form hidden">'
+            .'<span class="column">'
+            .$fcs->hidden(array('id'=>'department-search-id','value'=>$ownerDeptID))
+            .$fcs->text(array('id'=>'department-search','label'=>'Search Department','value'=>$ownerDeptName))
+            .'<div class="note" data-for="department-search">Type in either the acronym of the department, or a part of the name of the department and a dropdown list will show up matching your search query of the department.<br /><br />Press Esc key to automatically clear the search box.</div>'
+            .'<div class="search-results hidden" data-search="department-search" data-url="'.URL_BASE.'departments/search/" data-result="department-search-id"></div>'
+            .'</span>'
+        .'</div>'
+
+        /**
+         * Guest form
+         */
+        .'<div id="owner-type-guest-form" class="row owner-type-form hidden">'
+            .'<span class="column">'
+            .$fcs->hidden(array('id'=>'guest-search-id','value'=>$ownerGuestID))
+            .$fcs->text(array('id'=>'guest-search', 'label'=>'Search Guest','value'=>$ownerGuestName))
+            .'<div class="note" data-for="guest-search">Type in either firstname, middlename, or lastname and a dropdown list will show up matching your search query of the person. If the person doesn\'t exists in the system, please use this <a href="'.URL_BASE.'persons/registration/guest" target="_blank">guest registration form</a>.<br /><br />Press Esc key to automatically clear the search box.</div>'
+            .'<div class="search-results hidden" data-search="guest-search" data-url="'.URL_BASE.'persons/search_guest/" data-result="guest-search-id"></div>'
+            .'</span>'
+        .'</div>'
+
+
+        .$fcs->text(array('id'=>'owner-date-of-possession','class'=>'datepicker','label'=>'Date of Possession','value'=>date('Y-m-d')))
+
+
+        .$fcs->closeFieldset()
+        .$fcs->submit(array('value'=>$submitBtnValue,'auto_line_break'=>false))
+        .$fcs->closeForm()
+        .'</div>'
+        .'<script type="text/javascript" src="'.URL_TEMPLATE.'js/item.js"></script>';
 
 
     if ( !$echo ) return $singleItemForm;
     echo $singleItemForm;
 
 } //renderForm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -325,11 +539,6 @@ public function renderFrontpage ($echo=false) {
         .'</a>'
 
 
-        .'<a class="frontpage-option" href="'.URL_BASE.'items/update_item/">'
-        .'<div class="frontpage-option-image"><img src="'.URL_TEMPLATE.'img/items_frontpageOptionImage_updateItem.jpg" /></div>'
-        .'<div class="frontpage-option-name">Update an Item</div>'
-        .'</a>'
-
 
         .'<a class="frontpage-option" href="'.URL_BASE.'items/view_all/">'
         .'<div class="frontpage-option-image"></div>'
@@ -339,6 +548,19 @@ public function renderFrontpage ($echo=false) {
     if ( !$echo ) return $frontpage;
     echo $frontpage;
 } //renderFrontpage
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -407,9 +629,18 @@ public function displaySentVariables () {
  */
 public function renderSaveResults ($results=array(), $echo=false) {
 
+    /**
+     * Redirect the user to the single item view to avoid
+     * double entry of same item (when refreshing the page)
+     * if redirection is not present
+     */
+    header('location: '.URL_BASE.'items/view/'.$results['itemID'].'/');
+    exit(); //This is to stop further execution of the script / page
+
+
+
     $itemResult = $results['item'] == '1' ?
         'Success' : 'Failed';
-
 
 
     if ( $results['ownership'] == '1' )
@@ -443,6 +674,15 @@ public function renderSaveResults ($results=array(), $echo=false) {
 
 
 
+public function renderUpdateResults ($result) {
+    if ( $result === false )
+        echo 'Something went wrong and the item failed to update.';
+
+    header('location: '.URL_BASE.'items/view/'.$result.'/');
+} //renderUpdateResults
+
+
+
 
 
 
@@ -470,7 +710,8 @@ public function viewAll ($page='1', $echo=false) {
             ,'auto_label'       => true
         ));
 
-    $filter = '<div id="item-view-filter">'
+    $filter = '<b style="font-size: 1.5em;">Items <small>( Click on an item to view its information )</small></b><hr />'
+        .'<div id="item-view-filter">'
         .$form->openForm(array(
                 'id'    => 'item-view-filter-form'
                 ,'method'   => 'get'
@@ -529,6 +770,7 @@ public function viewAll ($page='1', $echo=false) {
                 .'<small style="color: #053;">Serial No.</small>'
             .'</th>'
             .'<th>Item Status</th>'
+            .'<th>Actions</th>'
         .'</tr>';
 
     foreach ( $itemList as $infos ) {
@@ -553,6 +795,10 @@ public function viewAll ($page='1', $echo=false) {
                 .'<small style="color: #053;">'.$infos['packageSerialNo'].'</small>'
             .'</td>'
             .'<td>'.$archiveStatus.'</td>'
+            .'<td>'
+                .'<a class="update-button" href="'.URL_BASE.'items/update_item/'.$infos['itemID'].'/"><input type="button" value="Update" /></a>'
+                .'<a class="delete-button" href="'.URL_BASE.'items/delete_item/'.$infos['itemID'].'/"><input class="btn-red" type="button" value="Delete" /></a>'
+            .'</td>'
             .'</tr>';
     }
 
@@ -621,7 +867,7 @@ public function renderItemInformation ($itemID, $echo=false) {
                 .'<td>'.$this->model->data('itemName').'</td>'
                 .'<td>'.$this->model->data('itemType').'</td>'
                 .'<td>'.$this->model->data('itemQuantity').' '.$this->model->data('itemQuantityUnit').'</td>'
-                .'<td>Underconstruction</td>'
+                .'<td>'.$this->model->data('currentOwner').'</td>'
                 .'<td>'.$this->model->data('itemState').'</td>'
                 .'<td>'.nl2br($this->model->data('itemDescription')).'</td>'
                 .'<td>'.$this->model->data('itemDateOfPurchase').'</td>'
@@ -743,8 +989,8 @@ public function renderItemInformation ($itemID, $echo=false) {
 
 
     $output .= '<br /><div>'
-        .'<a href="'.URL_BASE.'items/update/'.$this->model->data('itemID').'">Edit this Item</a><br />'
-        .'<a href="'.URL_BASE.'items/view_all">View all Items</a>'
+        .'<a href="'.URL_BASE.'items/update_item/'.$this->model->data('itemID').'/"><input type="button" value="Update Item" /></a>'
+        .'<a href="'.URL_BASE.'items/view_all/"><input type="button" value="View other Items" /></a>'
         .'</div>';
 
 

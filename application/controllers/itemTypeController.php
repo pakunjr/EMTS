@@ -25,17 +25,16 @@ public function decode ($id, $echo=false) {
     $cacheKeyword = 'itemType_label_'.$id;
     $label = $GLOBALS['cache']->get($cacheKeyword);
     if ( $label == null ) {
-        $query = "
-            SELECT label
-            FROM lst_item_type
-            WHERE
-                id = $id
-        ";
-        $result = $this->dbC->query($query);
-        $row = $result->fetch_assoc();
+
+        $result = $this->dbC->PDOStatement(array(
+            'query' => "SELECT label FROM lst_item_type WHERE id = ?"
+            ,'values'   => array(array('int', $id))
+            ));
+        $row = $result[0];
 
         $label = $row['label'];
         $GLOBALS['cache']->set($cacheKeyword, $label, 3600);
+
     }
 
     if ( !$echo ) return $label;
@@ -51,11 +50,11 @@ public function generateList () {
     $list = $GLOBALS['cache']->get('itemType_list');
     if ( $list == null ) {
         $list = array();
-        $query = $this->dbC->query("
-                SELECT *
-                FROM lst_item_type
-            ");
-        while ( $result = $query->fetch_assoc() ) {
+        $results = $this->dbC->PDOStatement(array(
+            'query' => "SELECT * FROM lst_item_type"
+            ,'values'   => array()
+            ));
+        foreach ( $results as $result ) {
             array_push($list, array(
                     'id'    => $result['id']
                     ,'label'    => $result['label']

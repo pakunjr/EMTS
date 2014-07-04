@@ -14,12 +14,31 @@ public function __construct ($model) {
 
 
 
+
+
+
+
+
+
+
+
 public function displayURI () {
     echo 'URI: ',URL_BASE,$this->model->data('uri'),'<br />'
         ,'Module: ',$this->model->data('module'),'<br />'
         ,'Controller: ',$this->model->data('controller'),'<br />'
         ,'Action: ',$this->model->data('action');
 } //displayURI
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -134,6 +153,16 @@ public function renderPage () {
 
 
 
+
+
+
+
+
+
+
+
+
+
 /**
  * Header and Footer
  */
@@ -144,6 +173,13 @@ public function getHeader () {
 public function getFooter () {
     require_once(TEMPLATE_DIR.DS.'footer.php');
 } //getFooter
+
+
+
+
+
+
+
 
 
 
@@ -162,6 +198,7 @@ public function renderNavigation ($echo=true) {
             .'<a href="'.URL_BASE.'admin/">Admin</a>'
             .'<ol type="none" class="submenu">'
             .'<li><a href="'.URL_BASE.'admin/cache/clean/">Clean Server Cache</a></li>'
+            .'<li><a href="'.URL_BASE.'admin/log/errors/">Error / Exception Log</a></li>'
             .'</ol>'
             .'</span>';
     } else
@@ -236,6 +273,12 @@ public function renderNavigation ($echo=true) {
     if ( !$echo ) return $navigation;
     echo $navigation;
 } //renderNavigation
+
+
+
+
+
+
 
 
 

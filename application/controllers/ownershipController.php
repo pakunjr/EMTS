@@ -31,44 +31,49 @@ public function __construct ($model) {
  * ownership information
  */
 public function getOwnerInformation ($ownershipID) {
-    $ownershipQuery = "
-            SELECT
+    $ownershipResult = $this->dbC->PDOStatement(array(
+        'query' => "SELECT
                 ownshp.owner_id
                 ,ownshpType.ownership_label AS owner_type
             FROM tbl_ownerships AS ownshp
             LEFT JOIN lst_ownership_type AS ownshpType ON ownshp.owner_type = ownshpType.id
             WHERE
-                ownership_id = '$ownershipID'
-        ";
-    $ownershipResult = $this->dbC->query($ownershipQuery);
-    $ownershipRow = $ownershipResult->fetch_assoc();
+                ownership_id = ?
+            LIMIT 1"
+        ,'values'   => array($ownershipID)
+        ));
+    $ownershipRow = $ownershipResult[0];
+
 
     $ownerID = $ownershipRow['owner_id'];
     $ownerType = strtolower($ownershipRow['owner_type']);
 
     if ( $ownerType == 'employee' ) {
-        $query = "
-            SELECT
-                persons.firstname
-                ,persons.middlename
-                ,persons.lastname
-                ,persons.suffix
 
-                ,employees.occupation
-                ,employees.employment_status
 
-                ,department.department_name
-                ,department.department_name_short
-            FROM tbl_employees AS employees
-            LEFT JOIN
-                tbl_persons AS persons ON employees.person_id = persons.person_id
-            LEFT JOIN
-                tbl_departments AS department ON employees.department_id = department.department_id
-            WHERE
-                employees.employee_id = $ownerID
-        ";
-        $result = $this->dbC->query($query);
-        $row = $result->fetch_assoc();
+        $result = $this->dbC->PDOStatement(array(
+            'query' => "SELECT
+                    persons.firstname
+                    ,persons.middlename
+                    ,persons.lastname
+                    ,persons.suffix
+
+                    ,employees.occupation
+                    ,employees.employment_status
+
+                    ,department.department_name
+                    ,department.department_name_short
+                FROM tbl_employees AS employees
+                LEFT JOIN
+                    tbl_persons AS persons ON employees.person_id = persons.person_id
+                LEFT JOIN
+                    tbl_departments AS department ON employees.department_id = department.department_id
+                WHERE
+                    employees.employee_id = ?
+                LIMIT 1"
+            ,'values'   => array(array('int', $ownerID))
+            ));
+        $row = $result[0];
         return array(
                 'firstname'     => $row['firstname']
                 ,'middlename'   => $row['middlename']
@@ -79,30 +84,35 @@ public function getOwnerInformation ($ownershipID) {
 
                 ,'ownerType'        => 'employee'
             );
+
+
     } else if ( $ownerType == 'department' ) {
-        $query = "
-            SELECT
-                departments.department_name
-                ,departments.department_name_short
-                ,departments.department_description
 
-                ,persons.firstname
-                ,persons.middlename
-                ,persons.lastname
-                ,persons.suffix
 
-                ,employees.occupation
-                ,employees.employment_status
-            FROM tbl_departments AS departments
-            LEFT JOIN
-                tbl_employees AS employees ON departments.department_head_id = employees.employee_id
-            LEFT JOIN
-                tbl_persons AS persons ON employees.person_id = persons.person_id
-            WHERE
-                departments.department_id = $ownerID
-        ";
-        $result = $this->dbC->query($query);
-        $row = $result->fetch_assoc();
+        $result = $this->dbC->PDOStatement(array(
+            'query' => "SELECT
+                    departments.department_name
+                    ,departments.department_name_short
+                    ,departments.department_description
+
+                    ,persons.firstname
+                    ,persons.middlename
+                    ,persons.lastname
+                    ,persons.suffix
+
+                    ,employees.occupation
+                    ,employees.employment_status
+                FROM tbl_departments AS departments
+                LEFT JOIN
+                    tbl_employees AS employees ON departments.department_head_id = employees.employee_id
+                LEFT JOIN
+                    tbl_persons AS persons ON employees.person_id = persons.person_id
+                WHERE
+                    departments.department_id = ?
+                LIMIT 1"
+            ,'values'   => array(array('int', $ownerID))
+            ));
+        $row = $result[0];
         return array(
                 'departmentName'    => $row['department_name']
                 ,'departmentShort'  => $row['department_name_short']
@@ -116,25 +126,30 @@ public function getOwnerInformation ($ownershipID) {
 
                 ,'ownerType'            => 'department'
             );
-    } else if ( $ownerType == 'guest' ) {
-        $query = "
-            SELECT
-                persons.firstname
-                ,persons.middlename
-                ,persons.lastname
-                ,persons.suffix
 
-                ,guests.occupation
-                ,guests.company_name
-                ,guests.company_details
-            FROM tbl_guests AS guests
-            LEFT JOIN
-                tbl_persons AS persons ON guests.person_id = persons.person_id
-            WHERE
-                guests.guest_id = $ownerID
-        ";
-        $result = $this->dbC->query($query);
-        $row = $result->fetch_assoc();
+
+    } else if ( $ownerType == 'guest' ) {
+
+
+        $result = $this->dbC->PDOStatement(array(
+            'query' => "SELECT
+                    persons.firstname
+                    ,persons.middlename
+                    ,persons.lastname
+                    ,persons.suffix
+
+                    ,guests.occupation
+                    ,guests.company_name
+                    ,guests.company_details
+                FROM tbl_guests AS guests
+                LEFT JOIN
+                    tbl_persons AS persons ON guests.person_id = persons.person_id
+                WHERE
+                    guests.guest_id = ?
+                LIMIT 1"
+            ,'values'   => array(array('int', $ownerID))
+            ));
+        $row = $result[0];
         return array(
                 'firstname'     => $row['firstname']
                 ,'middlename'   => $row['middlename']
@@ -146,6 +161,8 @@ public function getOwnerInformation ($ownershipID) {
 
                 ,'ownerType'            => 'guest'
             );
+
+
     } else {
         return array(
                 'ownerType' => 'none'
@@ -215,17 +232,20 @@ public function searchOwners ($searchKeyword) {
     $IDDepartments = array();
     $IDGuests = array();
 
-    $ownshpQuery = $this->dbC->query("
-            SELECT
+
+
+    $results = $this->dbC->PDOStatement(array(
+        'query' => "SELECT
                 ownshp.owner_id
                 ,ownshpType.ownership_label AS owner_type
             FROM tbl_ownerships AS ownshp
             LEFT JOIN lst_ownership_type AS ownshpType ON ownshp.owner_type = ownshpType.id
             GROUP BY
                 ownshp.owner_id
-                ,ownshp.owner_type
-        ");
-    while ( $ownshpRow = $ownshpQuery->fetch_assoc() ) {
+                ,ownshp.owner_type"
+        ,'values'   => array()
+        ));
+    foreach ( $results as $ownshpRow ) {
         $ownshpRow['owner_type'] = strtolower($ownshpRow['owner_type']);
         switch ( $ownshpRow['owner_type'] ) {
             case 'employee':
@@ -245,9 +265,11 @@ public function searchOwners ($searchKeyword) {
     }
 
 
+
     foreach ( $IDEmployees AS $ownerID ) {
-        $empQuery = $this->dbC->query("
-                SELECT
+
+        $results = $this->dbC->PDOStatement(array(
+            'query' => "SELECT
                     persons.firstname
                     ,persons.middlename
                     ,persons.lastname
@@ -257,15 +279,22 @@ public function searchOwners ($searchKeyword) {
                 FROM tbl_employees AS employees
                 LEFT JOIN tbl_persons AS persons ON employees.person_id = persons.person_id
                 WHERE
-                    employees.employee_id = $ownerID
+                    employees.employee_id = ?
                     AND (
-                        persons.firstname LIKE '%$searchKeyword%'
-                        OR persons.middlename LIKE '%$searchKeyword%'
-                        OR persons.lastname LIKE '%$searchKeyword%'
-                        OR persons.suffix LIKE '%$searchKeyword%'
-                    )
-            ");
-        while ( $empRow = $empQuery->fetch_assoc() ) {
+                        persons.firstname LIKE ?
+                        OR persons.middlename LIKE ?
+                        OR persons.lastname LIKE ?
+                        OR persons.suffix LIKE ?
+                    )"
+            ,'values'   => array(
+                    array('int', $ownerID)
+                    ,"%$searchKeyword%"
+                    ,"%$searchKeyword%"
+                    ,"%$searchKeyword%"
+                    ,"%$searchKeyword%"
+                )
+            ));
+        foreach ( $results as $empRow ) {
             $ownerLabel = $empRow['lastname'].', '.$empRow['firstname'].' '.$empRow['middlename'].' '.$empRow['suffix'];
             array_push($ownerList, array(
                     'ownerID'   => $empRow['employee_id']
@@ -273,24 +302,31 @@ public function searchOwners ($searchKeyword) {
                     ,'ownerType'    => 'Employee'
                 ));
         }
+
     } //IDEmployees foreach
 
 
     foreach ( $IDDepartments AS $ownerID ) {
-        $dptQuery = $this->dbC->query("
-                SELECT
+
+        $results = $this->dbC->PDOStatement(array(
+            'query' => "SELECT
                     department_id
                     ,department_name
                     ,department_name_short
                 FROM tbl_departments
                 WHERE
-                    department_id = $ownerID
+                    department_id = ?
                     AND (
-                        department_name LIKE '%$searchKeyword%'
-                        OR department_name_short LIKE '%$searchKeyword%'
-                    )
-            ");
-        while ( $dptRow = $dptQuery->fetch_assoc() ) {
+                        department_name LIKE ?
+                        OR department_name_short LIKE ?
+                    )"
+            ,'values'   => array(
+                    array('int', $ownerID)
+                    ,"%$searchKeyword%"
+                    ,"%$searchKeyword%"
+                )
+            ));
+        foreach ( $results as $dptRow ) {
             $ownerLabel = $dptRow['department_name_short'].' ('.$dptRow['department_name'].')';
             array_push($ownerList, array(
                     'ownerID'   => $dptRow['department_id']
@@ -298,12 +334,14 @@ public function searchOwners ($searchKeyword) {
                     ,'ownerType'    => 'Department'
                 ));
         }
+
     } //IDDepartments foreach
 
 
     foreach ( $IDGuests AS $ownerID ) {
-        $gQuery = $this->dbC->query("
-                SELECT
+        
+        $results = $this->dbC->PDOStatement(array(
+            'query' => "SELECT
                     persons.firstname
                     ,persons.middlename
                     ,persons.lastname
@@ -313,15 +351,22 @@ public function searchOwners ($searchKeyword) {
                 FROM tbl_guests AS guests
                 LEFT JOIN tbl_persons AS persons ON guests.person_id = persons.person_id
                 WHERE
-                    guests.guest_id = $ownerID
+                    guests.guest_id = ?
                     AND (
-                        persons.firstname LIKE '%$searchKeyword%'
-                        OR persons.middlename LIKE '%$searchKeyword%'
-                        OR persons.lastname LIKE '%$searchKeyword%'
-                        OR persons.suffix LIKE '%$searchKeyword%'
-                    )
-            ");
-        while ( $gRow = $gQuery->fetch_assoc() ) {
+                        persons.firstname LIKE ?
+                        OR persons.middlename LIKE ?
+                        OR persons.lastname LIKE ?
+                        OR persons.suffix LIKE ?
+                    )"
+            ,'values'   => array(
+                    array('int', $ownerID)
+                    ,"%$searchKeyword%"
+                    ,"%$searchKeyword%"
+                    ,"%$searchKeyword%"
+                    ,"%$searchKeyword%"
+                )
+            ));
+        foreach ( $results as $gRow ) {
             $ownerLabel = $gRow['lastname'].', '.$gRow['firstname'].' '.$gRow['middlename'].' '.$gRow['suffix'];
             array_push($ownerList, array(
                     'ownerID'   => $gRow['guest_id']
@@ -329,6 +374,7 @@ public function searchOwners ($searchKeyword) {
                     ,'ownerType'    => 'Guest'
                 ));
         }
+        
     } //IDGuests foreach
 
     $this->model->data('searchList', $ownerList);

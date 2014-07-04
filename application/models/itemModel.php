@@ -40,6 +40,7 @@ private $packageDateOfPurchase;
  * Ownership list / history
  */
 private $ownershipList;
+private $currentOwner;
 
 
 /**

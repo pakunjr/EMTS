@@ -96,8 +96,10 @@ class form {
 
 
     public function textarea ($o=array()) {
+        $e = array('value');
+        $value = isset($o['value']) ? $o['value'] : '';
         $output = $this->renderLabel($o)
-                .'<textarea'.$this->parseAttributes($o).'></textarea>';
+                .'<textarea'.$this->parseAttributes($o, $e).'>'.$value.'</textarea>';
         if ( isset($o['auto_line_break']) ) {
             if ( $o['auto_line_break'] )
                 $output .= '<br />';

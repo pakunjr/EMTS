@@ -131,6 +131,11 @@ var searchFunctions = function () {
         var typingTimer = null
             ,typingInterval = 500;
 
+        if ( $searchBox.val() != '' && $result.val() != '' ) {
+            searchCancelButton($searchBox, $result);
+            $searchBox.prop('disabled', true);
+        }
+
         $searchBox.on('keyup focus click', function (e) {
             /**
              * Clear search box if `esc` key was pressed
@@ -165,35 +170,12 @@ var searchFunctions = function () {
 
                                 dataHighlighter($dataThis);
                                 $dataThis.click(function () {
-                                    popAlert('confirm', {
-                                        'message': 'Set this as your choice?<br />'
-                                            +'Data: '+dataLabel
-                                        ,'action': function () {
-                                            $searchBox.val(dataLabel);
-                                            $result.val(dataIdentifier);
-
-                                            /**
-                                             * Search box canceller
-                                             */
-                                            $searchBox.after('<img class="search-result-cancel search-result-cancel-icon" />');
-                                            var $cancelButton = $searchBox.next('.search-result-cancel');
-                                            $cancelButton.css({
-                                                'margin-top': (0 - $cancelButton.height() / 2) + 5 + 'px'
-                                                ,'left': ($searchBox.offset().left - ($cancelButton.width() / 2)) + 5 + 'px'
-                                            }).click(function () {
-                                                popAlert('confirm', {
-                                                    'message': 'Cancel selected search?<br />'
-                                                        +'Data: '
-                                                        +$searchBox.val()
-                                                    ,'action': function () {
-                                                        $searchBox.val('');
-                                                        $result.val('');
-                                                        $cancelButton.remove();
-                                                    }
-                                                });
-                                            });
-                                        }
-                                    });
+                                    $result.val(dataIdentifier);
+                                    $searchBox.prop('disabled', true)
+                                        .val(dataLabel)
+                                        .trigger('change');
+                                    $this.addClass('hidden');
+                                    searchCancelButton($searchBox, $result);
                                 });
 
                             });
@@ -217,6 +199,25 @@ var searchFunctions = function () {
         });
     });
 }; //searchFunctions
+
+var searchCancelButton = function ($searchBox, $result) {
+    if ( $searchBox.next('.search-result-cancel').length < 1 ) {
+
+        $searchBox.after('<img class="search-result-cancel search-result-cancel-icon" />');
+        var $cancelButton = $searchBox.next('.search-result-cancel');
+        $cancelButton.css({
+            'margin-top': (0 - $cancelButton.height() / 2) + 5 + 'px'
+            ,'left': ($searchBox.offset().left - ($cancelButton.width() / 2)) + 5 + 'px'
+        }).click(function () {
+            $result.val('');
+            $searchBox.val('')
+                .trigger('change')
+                .prop('disabled', false);
+            $cancelButton.remove();
+        });
+
+    }
+}; //searchCancelButton
 
 
 

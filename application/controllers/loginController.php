@@ -12,14 +12,15 @@ public function __construct ($model) {
 
 
 public function validateUser ($username, $password) {
-    $dbModel = new databaseModel();
-    $dbController = new databaseController($dbModel);
+    $dbM = new databaseModel();
+    $dbC = new databaseController($dbM);
 
     /**
      * Check existence of the username
      */
-    $validateQuery = $dbController->query("
-            SELECT acc.username
+    $results = $dbC->PDOStatement(array(
+        'query' => "SELECT
+                acc.username
                 ,acc.password
                 ,acc.password_salt
                 ,acc.access_level AS access_level_id
@@ -32,13 +33,18 @@ public function validateUser ($username, $password) {
             FROM tbl_accounts AS acc
             LEFT JOIN tbl_persons AS person ON acc.owner_id = person.person_id
             LEFT JOIN lst_access_level AS access ON acc.access_level = access.id
-            WHERE acc.username = '$username'
-        ");
-    if ( $validateQuery->num_rows > 0 ) {
-        /**
-         * Validate the combination of username and password
-         */
-        $row = $validateQuery->fetch_array();
+            WHERE
+                acc.username = ?
+                OR person.email_address = ?
+            LIMIT 1"
+        ,'values'   => array(
+                $username
+                ,$username
+            )
+        ));
+
+    if ( count($results) > 0 ) {
+        $row = $results[0];
         $dbPassword = $row['password'];
         $dbSalt = $row['password_salt'];
 
@@ -57,10 +63,8 @@ public function validateUser ($username, $password) {
                     ,'email'            => $row['email_address']
                 );
             header('location: '.URL_BASE);
-        } else
-            $GLOBALS['pageView']->pageError('loginError');
-    } else
-        $GLOBALS['pageView']->pageError('loginError');
+        } else $GLOBALS['pageView']->pageError('loginError');
+    } else $GLOBALS['pageView']->pageError('loginError');
 
 } //validateUser
 

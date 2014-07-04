@@ -25,14 +25,12 @@ public function generateList () {
     $list = $GLOBALS['cache']->get('itemState_list');
     if ( $list == null ) {
         $list = array();
-        $query = $this->dbC->query("
-                SELECT
-                    id
-                    ,label
-                    ,description
-                FROM lst_item_state
-            ");
-        while ( $result = $query->fetch_assoc() ) {
+
+        $results = $this->dbC->PDOStatement(array(
+            'query' => "SELECT id, label, description FROM lst_item_state"
+            ,'values'   => array()
+            ));
+        foreach ( $results as $result ) {
             array_push($list, array(
                     'id'        => $result['id']
                     ,'label'     => $result['label']
