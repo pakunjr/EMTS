@@ -10,9 +10,18 @@ $(document).ready(function () {
         ,$showForm = null
         ,$visibleForm = null
         ,$dateOfPossessionBox = $('#owner-date-of-possession')
-        ,$dateOfPossessionBoxLabel = $dateOfPossessionBox.prev('label');
+        ,$dateOfPossessionBoxLabel = $dateOfPossessionBox.prev('label')
+        ,firstLoad = true;
 
-    $otBox.change(function () {
+
+    var toggleOwnershipForm = function () {
+        if ( firstLoad ) {
+            firstLoad = false;
+            $otEmpForm.slideUp(150);
+            $otDeptForm.slideUp(150);
+            $otGuestForm.slideUp(150);
+        }
+
         var selectedValue = $otBox.val()
             ,selectedLabel = null;
         $otBox.children('option').each(function () {
@@ -64,6 +73,12 @@ $(document).ready(function () {
             $dateOfPossessionBox.slideUp(150);
             $dateOfPossessionBoxLabel.slideUp(150);
         }
+    }; //toggleOwnershipForm
+
+
+    toggleOwnershipForm();
+    $otBox.change(function () {
+        toggleOwnershipForm();
     });
 
 
@@ -78,7 +93,7 @@ $(document).ready(function () {
         ,$PS = $('#single-item-package-search-id')
         ,$PSBox = $('#single-item-package-search');
 
-    if ( $PS.val() != '' ) $DOPBox.prop('disabled', true);
+    if ( $PS.val() != '' && $PS.val() != '0' ) $DOPBox.prop('disabled', true);
     else $DOPBox.prop('disabled', false);
 
     $PSBox.on('change keyup focusout', function () {
@@ -90,36 +105,6 @@ $(document).ready(function () {
 
 
 
-    /**
-     * Item type script
-     */
-    var $itBox = $('#single-item-type')
-        ,$specForm = $('#single-item-specification-form');
-
-    $itBox.children('option').each(function () {
-        var $this = $(this);
-        if ( $this.is(':selected')
-            && $this.html() == 'Devices'
-            && !$specForm.is(':visible') )
-            $specForm.slideDown(250);
-    });
-
-    $itBox.change(function () {
-        var selectedType = null;
-
-        $itBox.children('option').each(function () {
-            var $this = $(this);
-            if ( $this.is(':selected') ) selectedType = $this.html();
-        });
-
-        if ( selectedType == 'Devices' ) {
-            if ( !$specForm.is(':visible') )
-                $specForm.slideDown(250);
-        } else {
-            if ( $specForm.is(':visible') )
-                $specForm.slideUp(150);
-        }
-    });
 
 
 
@@ -147,28 +132,53 @@ $(document).ready(function () {
 
 
 
+
+
     /**
      * Deleting an item / archiving it in the system
      */
     if ( $('.delete-button').length > 0 ) {
         $('.delete-button').click(function () {
             var $this = $(this)
+                ,itemID = $this.attr('data-item-id')
                 ,url = $this.attr('href')
-                ,$infoBlock = $this.closest('tr').children('td:first-child');
+                ,$infoBlock = null;
+
+
+            if ( $('#form-container-single').length > 0 ) {
+                $infoBlock = '<div>'
+                    +'<span>'+$('#single-item-name').val()+'</span><br />'
+                    +'<span style="color: #f00;"><small>'+$('#single-item-serial-no').val()+'</small></span><br />'
+                    +'<span style="color: #03f;"><small>'+$('#single-item-model-no').val()+'</small></span><br />'
+                    +'</div>';
+            } else if ( $('#single-item-view').length > 0 ) {
+                $infoBlock = '<div>'
+                    +'<span>'+$('#view-name').html()+'</span><br />'
+                    +'<span style="color: #f00;"><small>'+$('#view-serial-no').html()+'</small></span><br />'
+                    +'<span style="color: #03f;"><small>'+$('#view-model-no').html()+'</small></span><br />'
+                    +'</div>';
+            } else {
+                $infoBlock = $this.closest('tr').children('td:first-child').html();
+            }
+
+            var postDeleteMsg = '<span style="display: block; padding: 10px 15px; border-radius: 5px; border: 1px solid #ccc;">'
+                + '</span>';
+
 
             popAlert('confirm', {
                 'message': 'Are you sure you want to delete this item?'
-                +'<span style="display: block; padding: 10px 15px; border-radius: 5px; border: 1px solid #ccc;">'
-                +$infoBlock.html()
-                +'</span>'
+                    +postDeleteMsg
                 ,'action': function () {
-                    window.location = url;
+                    window.location = url+itemID+'/';
                 }
             });
 
             return false;
         });
     }
+
+
+
 
 
 
@@ -232,11 +242,18 @@ $(document).ready(function () {
             return false;
         }
 
+        var confirmMsg = '';
+        if ( $('#item-id').val() != '' ) {
+            confirmMsg = 'Update the information of the item `'+$('#single-item-name').val()+'`?'+'<br />'
+                +'Serial No.: <span style="color: #f00;">'+$('#single-item-serial-no').val()+'</span><br />'
+                +'Model No.: <span style="color: #03f;">'+$('#single-item-model-no').val()+'</span>';
+        } else confirmMsg = 'Save the information of the new item?';
 
         popAlert('confirm', {
-            'message': 'Save the information of the new item?<br />'
-                +'<small>Please be sure that all informations you entered are correct. Thank you.</small>'
+            'message': confirmMsg+'<br /><br />'
+                +'<small>Please be sure to have entered the correct and accurate information and datas.<br /><br />Thank you and have a good day.</small>'
             ,'action': function () {
+                $('input:disabled').prop('disabled', false);
                 $siForm.submit();
             }
         });

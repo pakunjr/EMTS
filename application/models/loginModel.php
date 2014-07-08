@@ -4,6 +4,7 @@ class loginModel {
 
 private $isAuthorized;
 
+private $accountID;
 private $username;
 private $accessLevelID;
 private $accessLevel;
@@ -19,6 +20,8 @@ private $email;
 
 public function __construct () {
     $this->isAuthorized = isset($_SESSION['user']) ? true : false;
+    $this->accountID = isset($_SESSION['user']['accountID'])
+        ? $_SESSION['user']['accountID'] : null;
     $this->username = isset($_SESSION['user']['username'])
         ? $_SESSION['user']['username'] : null;
     $this->accessLevelID = isset($_SESSION['user']['accessLevelID'])
@@ -50,5 +53,17 @@ public function data ($name, $value=null) {
     if ( $value == null ) return $this->$name;
     $this->$name = $value;
 } //data
+
+
+
+
+
+public function getUserName ($format='fullname') {
+    $fullname = $this->lastname.', '
+        .$this->firstname.' '
+        .$this->middlename.' '
+        .$this->suffix;
+    return $fullname;
+}
 
 }

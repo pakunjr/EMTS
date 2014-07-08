@@ -4,8 +4,9 @@ class databaseController {
 
 private $model;
 
-public function __construct ($model) {
-    $this->model = $model;
+public function __construct ($model=null) {
+    if ( $model == null ) $this->model = new databaseModel();
+    else $this->model = $model;
 } //__construct
 
 
@@ -41,31 +42,9 @@ public function connect () {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 public function disconnect () {
     $this->model->data('connection')->close();
 } //disconnect
-
-
-
-
-
-
-
-
-
-
-
 
 
 public function query ($sqlQuery) {
@@ -73,20 +52,7 @@ public function query ($sqlQuery) {
     $connection = $this->model->data('connection');
     $sql = $connection->query($sqlQuery);
     return $sql;
-
-    /**
-     * Prepare statement
-     * pending
-     */
-    $stmt = $connection->prepare($sqlQuery);
 } //query
-
-
-
-
-
-
-
 
 
 
@@ -97,19 +63,10 @@ public function escapeString ($stringValue) {
     return trim($escapedString);
 } //escapeString
 
+
 public function escapeArray ($array) {
     return array_map(array($this, 'escapeString'), $array);
 } //escapeArray
-
-
-
-
-
-
-
-
-
-
 
 
 

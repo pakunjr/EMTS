@@ -48,6 +48,16 @@ public function renderPage ($controller, $action=null, $extra=null) {
             break;
 
 
+
+
+        case 'search_package_item':
+            $this->controller->searchPackageItem($action);
+            $this->displayPackageItemSearch(true);
+            break;
+
+
+
+
         case 'new_item':
             switch ( $action ) {
                 case null:
@@ -134,6 +144,7 @@ public function renderPage ($controller, $action=null, $extra=null) {
  * Generate and return single item form
  */
 public function renderForm ($action='create', $echo=false, $id=null) {
+
     if ( $action == 'create' )
         $formHead = '<b style="font-size: 1.5em;">New Item</b><hr />';
     else if ( $action == 'update' )
@@ -167,8 +178,6 @@ public function renderForm ($action='create', $echo=false, $id=null) {
     $packageC = new packageController($packageM);
 
 
-
-
     if ( $action == 'update' ) {
 
         if ( $id === null ) {
@@ -176,7 +185,7 @@ public function renderForm ($action='create', $echo=false, $id=null) {
             $errC->logError('Failed to show update form, no item ID passed');
             return false;
         }
-        $action = URL_BASE.'items/update_item/save/';
+        $formAction = URL_BASE.'items/update_item/save/';
         $itemID = $id;
 
         $results = $dbC->PDOStatement(array(
@@ -191,26 +200,19 @@ public function renderForm ($action='create', $echo=false, $id=null) {
                     ,items.quantity_unit
                     ,items.date_of_purchase
                     ,items.package_id
-
-                    ,specs.id AS specsID
-                    ,specs.processor
-                    ,specs.video
-                    ,specs.display
-                    ,specs.webcam
-                    ,specs.audio
-                    ,specs.network
-                    ,specs.usb_ports
-                    ,specs.memory
-                    ,specs.storage
-                    ,specs.os
-                    ,specs.software
+                    ,items.has_components
+                    ,items.component_of
+                    ,items.is_archived
                 FROM tbl_items AS items
-                LEFT JOIN tbl_items_specification AS specs ON items.item_id = specs.item_id
                 WHERE items.item_id = ?
                 LIMIT 1"
             ,'values'   => array(array('int', $itemID))
             ));
         $row = $results[0];
+
+        if ( $row['is_archived'] == '1' ) {
+            header('location: '.URL_BASE.'items/view_all/');
+        }
 
         $itemSerialNo = $row['item_serial_no'];
         $itemModelNo = $row['item_model_no'];
@@ -224,19 +226,12 @@ public function renderForm ($action='create', $echo=false, $id=null) {
         $packageID = $row['package_id'];
         $packageName = $packageID != '' ?
             $packageC->getPackageName($packageID) : '';
+        $hasComponent = $row['has_components'] == '1' ? true : false;
+        $componentOfID = $row['component_of'];
+        $componentOfLabel = '';
+        $isComponent = $componentOfID != 0 && $componentOfID != null ?
+            true : false;
 
-        $itemSpecsID = $row['specsID'];
-        $itemSpecsProcessor = $row['processor'];
-        $itemSpecsVideo = $row['video'];
-        $itemSpecsDisplay = $row['display'];
-        $itemSpecsWebcam = $row['webcam'];
-        $itemSpecsAudio = $row['audio'];
-        $itemSpecsNetwork = $row['network'];
-        $itemSpecsUSBPorts = $row['usb_ports'];
-        $itemSpecsMemory = $row['memory'];
-        $itemSpecsStorage = $row['storage'];
-        $itemSpecsOS = $row['os'];
-        $itemSpecsSoftware = $row['software'];
 
         $ownshpResult = $dbC->PDOStatement(array(
             'query' => "SELECT
@@ -294,7 +289,7 @@ public function renderForm ($action='create', $echo=false, $id=null) {
 
     } else {
 
-        $action = URL_BASE.'items/new_item/save/';
+        $formAction = URL_BASE.'items/new_item/save/';
 
         $itemID = '';
 
@@ -333,11 +328,18 @@ public function renderForm ($action='create', $echo=false, $id=null) {
         $ownerGuestName = '';
         $dateOfPossession = '';
 
+        $hasComponent = false;
+        $componentOfID = '';
+        $componentOfLabel = '';
+        $isComponent = false;
+
         $submitBtnValue = 'Save Item';
 
     }
 
 
+    $viewBtn = $action == 'update' ? '<a href="'.URL_BASE.'/items/view/'.$itemID.'/">'.$fcs->button(array('value'=>'View Item','auto_line_break'=>false)).'</a>' : '';
+    $deleteBtn = $action == 'update' ? '<a class="delete-button" href="'.URL_BASE.'/items/delete_item/'.$itemID.'/">'.$fcs->button(array('class'=>'btn-red','value'=>'Delete Item')).'</a>' : '';
 
 
 
@@ -345,17 +347,19 @@ public function renderForm ($action='create', $echo=false, $id=null) {
         .$fcs->openForm(array(
             'id'    => 'new-single-item-form'
             ,'method'   => 'post'
-            ,'action'   => $action
+            ,'action'   => $formAction
             ,'enctype'  => 'multipart/form-data'
         ))
         .$fcs->hidden(array('id'=>'item-id','value'=>$itemID))
-        .$fcs->openFieldset(array('legend'=>'Item Information'))
+        .$fcs->openFieldset(array('legend'=>'Item Information','id'=>'item-fieldset'))
         .'<div class="row">'
             .'<span class="column">'
             .$fcs->text(array('id'=>'single-item-serial-no','label'=>'Serial No.','value'=>$itemSerialNo))
             .$fcs->text(array('id'=>'single-item-model-no','label'=>'Model No.','value'=>$itemModelNo))
             .$fcs->text(array('id'=>'single-item-quantity','label'=>'Quantity','class'=>'numeric','value'=>$quantity))
             .$fcs->text(array('id'=>'single-item-quantity-unit','label'=>'Quantity-Unit','value'=>$quantityUnit))
+            .$fcs->select(array('id'=>'single-item-type','label'=>'Item Type','select_options'=>$itemTypeV->generateSelectOptions(),'default_option'=>$itemType))
+            .'<div class="note" data-for="single-item-type">'.$itemTypeV->generateNote().'</div>'
             .'</span><!-- .column -->'
 
 
@@ -390,50 +394,23 @@ public function renderForm ($action='create', $echo=false, $id=null) {
                     .'No. of Drawers: 1 long and 3 short'
                 .'</div>'
             .'</div>'
+            .$fcs->text(array('id'=>'single-item-date-purchase','label'=>'Date of Purchase','class'=>'datepicker','value'=>$dateOfPurchase))
             .'</span><!-- .column -->'
 
 
             .'<span class="column">'
-            .$fcs->text(array('id'=>'single-item-date-purchase','label'=>'Date of Purchase','class'=>'datepicker','value'=>$dateOfPurchase))
-            .$fcs->select(array('id'=>'single-item-type','label'=>'Item Type','select_options'=>$itemTypeV->generateSelectOptions(),'default_option'=>$itemType))
-            .'<div class="note" data-for="single-item-type">'.$itemTypeV->generateNote().'</div>'
             .$fcs->hidden(array('id'=>'single-item-package-search-id','value'=>$packageID))
             .$fcs->text(array('id'=>'single-item-package-search','label'=>'Search Package','value'=>$packageName))
             .'<div class="note" data-for="single-item-package-search">If this item belongs to a package, search the package through here, if the package is missing, please add it using the <a href="'.URL_BASE.'packages/new/">package form</a>.<br /><br />Press `Esc` key to automatically clear the search box.</div>'
             .'<div class="search-results hidden" data-search="single-item-package-search" data-result="single-item-package-search-id" data-url="'.URL_BASE.'packages/search/"></div>'
+            .$fcs->checkbox(array('id'=>'has-component','label'=>'Has Component/s','value'=>'has-component','checked'=>$hasComponent))
+            .$fcs->checkbox(array('id'=>'is-component','label'=>'Is Component','value'=>'is-component','checked'=>$isComponent))
             .'</span><!-- .column -->'
         .'</div><!-- .row -->'
         .$fcs->closeFieldset()
 
 
-        /**
-         * Item specification
-         */
-        .$fcs->openFieldset(array('id'=>'single-item-specification-form','class'=>'hidden','legend'=>'Item Specifications'))
-        .'<div class="row">'
-            .'<span class="column">'
-            .$fcs->text(array('id'=>'item-specs-processor','label'=>'Processor','value'=>$itemSpecsProcessor))
-            .$fcs->text(array('id'=>'item-specs-video','label'=>'Video','value'=>$itemSpecsVideo))
-            .$fcs->text(array('id'=>'item-specs-display','label'=>'Display','value'=>$itemSpecsDisplay))
-            .$fcs->text(array('id'=>'item-specs-webcam','label'=>'Webcam','value'=>$itemSpecsWebcam))
-            .$fcs->text(array('id'=>'item-specs-audio','label'=>'Audio','value'=>$itemSpecsAudio))
-            .'</span>'
 
-
-            .'<span class="column">'
-            .$fcs->text(array('id'=>'item-specs-network','label'=>'Network','value'=>$itemSpecsNetwork))
-            .$fcs->text(array('id'=>'item-specs-usbports','label'=>'USB Ports','value'=>$itemSpecsUSBPorts))
-            .$fcs->text(array('id'=>'item-specs-memory','label'=>'Memory','value'=>$itemSpecsMemory))
-            .$fcs->textarea(array('id'=>'item-specs-storage','label'=>'Storage','value'=>$itemSpecsStorage))
-            .'</span>'
-
-
-            .'<span class="column">'
-            .$fcs->text(array('id'=>'item-specs-os','label'=>'Operating System','value'=>$itemSpecsOS))
-            .$fcs->textarea(array('id'=>'item-specs-software','label'=>'Other Software','value'=>$itemSpecsSoftware))
-            .'</span>'
-        .'</div>'
-        .$fcs->closeFieldset()
 
 
         /**
@@ -463,7 +440,7 @@ public function renderForm ($action='create', $echo=false, $id=null) {
         /**
          * Department form
          */
-        .'<div id="owner-type-department-form" class="row owner-type-form hidden">'
+        .'<div id="owner-type-department-form" class="row owner-type-form">'
             .'<span class="column">'
             .$fcs->hidden(array('id'=>'department-search-id','value'=>$ownerDeptID))
             .$fcs->text(array('id'=>'department-search','label'=>'Search Department','value'=>$ownerDeptName))
@@ -475,7 +452,7 @@ public function renderForm ($action='create', $echo=false, $id=null) {
         /**
          * Guest form
          */
-        .'<div id="owner-type-guest-form" class="row owner-type-form hidden">'
+        .'<div id="owner-type-guest-form" class="row owner-type-form">'
             .'<span class="column">'
             .$fcs->hidden(array('id'=>'guest-search-id','value'=>$ownerGuestID))
             .$fcs->text(array('id'=>'guest-search', 'label'=>'Search Guest','value'=>$ownerGuestName))
@@ -487,9 +464,32 @@ public function renderForm ($action='create', $echo=false, $id=null) {
 
         .$fcs->text(array('id'=>'owner-date-of-possession','class'=>'datepicker','label'=>'Date of Possession','value'=>date('Y-m-d')))
 
-
         .$fcs->closeFieldset()
+
+
+
+
+
+        /**
+         * Component information
+         */
+        .$fcs->openFieldset(array('id'=>'component-fieldset','legend'=>'Component Information'))
+        .'<span class="column">'
+        .$fcs->hidden(array('id'=>'item-search-id','value'=>$componentOfID))
+        .$fcs->text(array('id'=>'item-search','label'=>'Item Search','value'=>$componentOfLabel))
+        .'<div class="search-results hidden" data-search="item-search" data-url="'.URL_BASE.'items/search_package_item/" data-result="item-search-id"></div>'
+        .'</span>'
+        .$fcs->closeFieldset()
+
+
+
+
+        /**
+         * Buttons
+         */
         .$fcs->submit(array('value'=>$submitBtnValue,'auto_line_break'=>false))
+        .$viewBtn
+        .$deleteBtn
         .$fcs->closeForm()
         .'</div>'
         .'<script type="text/javascript" src="'.URL_TEMPLATE.'js/item.js"></script>';
@@ -571,115 +571,93 @@ public function renderFrontpage ($echo=false) {
 
 
 
-
-
-/**
- * Display sent variables either POST or GET
- */
-public function displaySentVariables () {
-    echo '<table>'
-        ,'<tr>'
-            ,'<th>Variable Type</th>'
-            ,'<th>Label</th>'
-            ,'<th>Value</th>'
-        ,'</tr>';
-
-    if ( isset($_POST) ) {
-        foreach ( $_POST as $label => $value ) {
-            echo '<tr>'
-                ,'<td>POST</td>'
-                ,'<td>',$label,'</td>'
-                ,'<td>',$value,'</td>'
-                ,'</tr>';
-        }
-    } else if ( isset($_GET) ) {
-        foreach ( $_GET as $label => $value ) {
-            echo '<tr>'
-                ,'<td>GET</td>'
-                ,'<td>',$label,'</td>'
-                ,'<td>',$value,'</td>'
-                ,'</tr>';
-        }
-    } else {
-        echo 'There are no sent variables';
-    }
-
-    echo '</table>';
-} //displaySentVariables
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * Render save results
  */
-public function renderSaveResults ($results=array(), $echo=false) {
+public function renderSaveResults ($itemID, $echo=false) {
 
-    /**
-     * Redirect the user to the single item view to avoid
-     * double entry of same item (when refreshing the page)
-     * if redirection is not present
-     */
-    header('location: '.URL_BASE.'items/view/'.$results['itemID'].'/');
-    exit(); //This is to stop further execution of the script / page
+    if ( $itemID === false )
+        echo 'Something went wrong and the item failed to be created';
 
+    header('location: '.URL_BASE.'items/view/'.$itemID.'/');
 
-
-    $itemResult = $results['item'] == '1' ?
-        'Success' : 'Failed';
-
-
-    if ( $results['ownership'] == '1' )
-        $ownershipResult = 'Success';
-    else if ( $results['ownership'] == 'n/a' )
-        $ownershipResult = 'Not Applicable';
-    else
-        $ownershipResult = 'Failed';
-
-
-
-    if ( $results['specification'] == '1' )
-        $specificationResult = 'Success';
-    else if ( $results['specification'] == 'n/a' )
-        $specificationResult = 'Not Applicable';
-    else
-        $specificationResult = 'Failed';
-
-
-    $output = '<div>'
-        .'Saving results:<hr />'
-        .'Item: '.$itemResult.'<br />'
-        .'Ownership: '.$ownershipResult.'<br />'
-        .'Specifications: '.$specificationResult.'<br /><br />'
-        .'<a href="'.URL_BASE.'items/view/'.$results['itemID'].'/">View ITEM</a>'
-        .'</div>';
-
-    if ( !$echo ) return $output;
-    echo $output;
 } //renderSaveResults
 
 
 
 public function renderUpdateResults ($result) {
     if ( $result === false )
-        echo 'Something went wrong and the item failed to update.';
+        echo 'Something went wrong and the item failed to be updated.';
 
     header('location: '.URL_BASE.'items/view/'.$result.'/');
 } //renderUpdateResults
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public function displayPackageItemSearch ($echo=false) {
+    $itemResults = $this->model->data('itemSearch');
+
+    if ( $itemResults === false || !is_array($itemResults) ) {
+        echo 'There are no results found.';
+        return;
+    }
+
+    $output = '<table>'
+        .'<tr>'
+        .'<th>Serial No.</th>'
+        .'<th>Model No.</th>'
+        .'<th>Name</th>'
+        .'<th>Date of Purchase</th>'
+        .'</tr>';
+
+
+    foreach ( $itemResults as $itemResult ) {
+        $label = $itemResult['name'].' ( '.$itemResult['serialNo'].', '.$itemResult['modelNo'].' )';
+        $output .= '<tr class="search-results">'
+            .'<td>'
+                .'<span class="search-result-label">'.$label.'</span>'
+                .'<span class="search-result-identifier">'.$itemResult['itemID'].'</span>'
+                .$itemResult['serialNo']
+            .'</td>'
+            .'<td>'.$itemResult['modelNo'].'</td>'
+            .'<td>'.$itemResult['name'].'</td>'
+            .'<td>'.$itemResult['dateOfPurchase'].'</td>'
+            .'</tr>';
+    }
+
+    $output .= '</table>';
+
+    if ( !$echo ) return $output;
+    echo $output;
+} //displayPackageItemSearch
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -705,12 +683,15 @@ public function viewAll ($page='1', $echo=false) {
     $this->controller->readAll();
     $itemList = $this->model->data('itemList');
 
+    $isM = new itemStateModel();
+    $isC = new itemStateController($isM);
+
     $form = new form(array(
             'auto_line_break'   => false
             ,'auto_label'       => true
         ));
 
-    $filter = '<b style="font-size: 1.5em;">Items <small>( Click on an item to view its information )</small></b><hr />'
+    $filter = '<b style="font-size: 1.5em;">Items</b><hr />'
         .'<div id="item-view-filter">'
         .$form->openForm(array(
                 'id'    => 'item-view-filter-form'
@@ -741,8 +722,6 @@ public function viewAll ($page='1', $echo=false) {
         .'</div>';
 
 
-
-
     if ( !is_array($itemList) ) {
         $output = 'There are no items.';
         if ( !$echo ) return $output;
@@ -753,7 +732,7 @@ public function viewAll ($page='1', $echo=false) {
     $output = $filter.'<table id="item-list" class="tabular-view">'
         .'<tr>'
             .'<th>'
-                .'Item<br />'
+                .'Item Name<br />'
                 .'<span style="display: inline-block; text-align: left;">'
                 .'<small style="color: #f00;">Serial No.</small><br />'
                 .'<small style="color: #03f;">Model No.</small>'
@@ -778,6 +757,10 @@ public function viewAll ($page='1', $echo=false) {
             '<small style="color: #053;">Item OK</small>'
             : '<small style="color: #f00;">Item no longer exist.</small>';
 
+        $actionBtn = $infos['itemArchiveStatus'] == '1' ? '' :
+            '<a class="update-button" href="'.URL_BASE.'items/update_item/'.$infos['itemID'].'/"><input class="btn-green" type="button" value="Update" /></a>'
+            .'<a class="delete-button" href="'.URL_BASE.'items/delete_item/'.$infos['itemID'].'/"><input class="btn-red" type="button" value="Delete" /></a>';
+
         $output .= '<tr class="item-data" data-id="'.$infos['itemID'].'" data-url="'.URL_BASE.'items/view/'.$infos['itemID'].'">'
             .'<td>'
                 .$infos['itemName'].'<br />'
@@ -786,7 +769,7 @@ public function viewAll ($page='1', $echo=false) {
             .'</td>'
             .'<td>'.$infos['itemType'].'</td>'
             .'<td>'.$infos['itemQuantity'].' '.$infos['itemQuantityUnit'].'</td>'
-            .'<td>'.$infos['itemState'].'</td>'
+            .'<td>'.$isC->decodeID($infos['itemState']).'</td>'
             .'<td>'.nl2br($infos['itemDescription']).'</td>'
             .'<td>'.$infos['itemDOP'].'</td>'
             .'<td>'.$infos['itemOwner'].'</td>'
@@ -796,8 +779,7 @@ public function viewAll ($page='1', $echo=false) {
             .'</td>'
             .'<td>'.$archiveStatus.'</td>'
             .'<td>'
-                .'<a class="update-button" href="'.URL_BASE.'items/update_item/'.$infos['itemID'].'/"><input type="button" value="Update" /></a>'
-                .'<a class="delete-button" href="'.URL_BASE.'items/delete_item/'.$infos['itemID'].'/"><input class="btn-red" type="button" value="Delete" /></a>'
+                .$actionBtn
             .'</td>'
             .'</tr>';
     }
@@ -823,11 +805,37 @@ public function viewAll ($page='1', $echo=false) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Render single item information for viewing
  */
 public function renderItemInformation ($itemID, $echo=false) {
     $this->controller->readItem($itemID);
+    $itemArchiveStatus = $this->model->data('itemArchiveStatus');
+
+    $isM = new itemStateModel();
+    $isC = new itemStateController($isM);
+
+    $logM = new logModel();
+    $logV = new logView($logM);
+
+    $otM = new ownerTypeModel();
+    $otC = new ownerTypeController($otM);
 
     if ( !$this->model->data('itemExists') ) {
         $output = 'Error: This item never exists.<br /><br />'
@@ -840,14 +848,14 @@ public function renderItemInformation ($itemID, $echo=false) {
     }
 
     $archiveNotice = '';
-    if ( $this->model->data('itemArchiveStatus') == '1' ) {
-        $archiveNotice = '<div style="color: #f00;">This item no longer exists as it has been archived in the system.</div><br /><hr />';
+    if ( $itemArchiveStatus == '1' ) {
+        $archiveNotice = '<div style="color: #f00;">Please take note that this item is already archived in the system.</div><br /><hr />';
     }
     
     /**
      * Display item information
      */
-    $output = $archiveNotice.'Item Information<hr />'
+    $output = $archiveNotice.'<span id="single-item-view" style="font-size: 1.5em;">'.$this->model->data('itemName').'</span><hr />'
         .'<div class="row" style="font-size: 0.95em;">'
             .'<table class="tabular-view">'
             .'<tr>'
@@ -862,77 +870,26 @@ public function renderItemInformation ($itemID, $echo=false) {
                 .'<th>Date of Purchase</th>'
             .'</tr>'
             .'<tr>'
-                .'<td>'.$this->model->data('itemSerialNo').'</td>'
-                .'<td>'.$this->model->data('itemModelNo').'</td>'
-                .'<td>'.$this->model->data('itemName').'</td>'
+                .'<td id="view-serial-no">'.$this->model->data('itemSerialNo').'</td>'
+                .'<td id="view-model-no">'.$this->model->data('itemModelNo').'</td>'
+                .'<td id="view-name">'.$this->model->data('itemName').'</td>'
                 .'<td>'.$this->model->data('itemType').'</td>'
                 .'<td>'.$this->model->data('itemQuantity').' '.$this->model->data('itemQuantityUnit').'</td>'
                 .'<td>'.$this->model->data('currentOwner').'</td>'
-                .'<td>'.$this->model->data('itemState').'</td>'
+                .'<td>'.$isC->decodeID($this->model->data('itemState')).'</td>'
                 .'<td>'.nl2br($this->model->data('itemDescription')).'</td>'
                 .'<td>'.$this->model->data('itemDateOfPurchase').'</td>'
             .'</tr>'
             .'</table>'
         .'</div>';
 
-    /**
-     * Display item specification if
-     * the item is categorized as a
-     * device and the specifications
-     * have been set
-     */
-    if ( $this->model->data('itemType') == 'Devices' && (
-            $this->model->data('itemSpecsProcessor') != ''
-            && $this->model->data('itemSpecsVideo') != ''
-            && $this->model->data('itemSpecsDisplay') != ''
-            && $this->model->data('itemSpecsWebcam') != ''
-            && $this->model->data('itemSpecsAudio') != ''
-            && $this->model->data('itemSpecsNetwork') != ''
-            && $this->model->data('itemSpecsUSBPorts') != ''
-            && $this->model->data('itemSpecsMemory') != ''
-            && $this->model->data('itemSpecsStorage') != ''
-            && $this->model->data('itemSpecsOS') != ''
-            && $this->model->data('itemSpecsSoftware') != ''
-        ) ) {
-        $output .= '<br />Item Specifications<hr />'
-            .'<div class="row" style="font-size: 0.9em;">'
-                .'<table class="tabular-view">'
-                .'<tr>'
-                    .'<th>Processor</th>'
-                    .'<th>Video</th>'
-                    .'<th>Display</th>'
-                    .'<th>Webcam</th>'
-                    .'<th>Audio</th>'
-                    .'<th>Network</th>'
-                    .'<th>USBPorts</th>'
-                    .'<th>Memory</th>'
-                    .'<th>Storage</th>'
-                    .'<th>OS</th>'
-                    .'<th>Software</th>'
-                .'</tr>'
-                .'<tr>'
-                    .'<td>'.$this->model->data('itemSpecsProcessor').'</td>'
-                    .'<td>'.$this->model->data('itemSpecsVideo').'</td>'
-                    .'<td>'.$this->model->data('itemSpecsDisplay').'</td>'
-                    .'<td>'.$this->model->data('itemSpecsWebcam').'</td>'
-                    .'<td>'.$this->model->data('itemSpecsAudio').'</td>'
-                    .'<td>'.$this->model->data('itemSpecsNetwork').'</td>'
-                    .'<td>'.$this->model->data('itemSpecsUSBPorts').'</td>'
-                    .'<td>'.$this->model->data('itemSpecsMemory').'</td>'
-                    .'<td>'.nl2br($this->model->data('itemSpecsStorage')).'</td>'
-                    .'<td>'.$this->model->data('itemSpecsOS').'</td>'
-                    .'<td>'.nl2br($this->model->data('itemSpecsSoftware')).'</td>'
-                .'</tr>'
-                .'</table>'
-            .'</div>';
-    }
+
 
     /**
      * Display package information if
      * the item belongs to a package
      */
-    if ( $this->model->data('packageID') != ''
-            || $this->model->data('packageID') != null ) {
+    if ( $this->model->data('packageID') != '0' && $this->model->data('packageID') != '' && $this->model->data('packageID') != null ) {
         $output .= '<br />Package Information<hr />'
             .'<div class="row" style="font-size: 0.9em;">'
                 .'<table class="tabular-view">'
@@ -972,14 +929,19 @@ public function renderItemInformation ($itemID, $echo=false) {
             .'</tr>';
 
         foreach ( $ownershipList as $ownership ) {
+            $ownshpStatus = $ownership['ownershipStatus'];
+            $ownshpStatus = $ownshpStatus  == 'active' ?
+                '<span style="color: #053;">'.$ownshpStatus.'</span>'
+                : '<span style="color: #f00;">'.$ownshpStatus.'</span>';
+
             $output .= '<tr>'
                 .'<td>'.$ownership['ID'].'</td>'
-                .'<td>'.$ownership['ownerType'].'</td>'
+                .'<td>'.$otC->decodeID($ownership['ownerType']).'</td>'
                 .'<td>'.$ownership['itemOwner'].'</td>'
-                .'<td>'.$ownership['itemStatus'].'</td>'
+                .'<td>'.$isC->decodeID($ownership['itemStatus']).'</td>'
                 .'<td>'.$ownership['dateOfPossession'].'</td>'
                 .'<td>'.$ownership['dateOfRelease'].'</td>'
-                .'<td>'.$ownership['ownershipStatus'].'</td>'
+                .'<td>'.$ownshpStatus.'</td>'
                 .'</tr>';
         }
 
@@ -988,9 +950,25 @@ public function renderItemInformation ($itemID, $echo=false) {
     }
 
 
+    $updateBtn = $itemArchiveStatus != '1' ?
+        '<a href="'.URL_BASE.'items/update_item/'.$this->model->data('itemID').'/"><input class="btn-green" type="button" value="Update Item" /></a>' : '';
+    $deleteBtn = $itemArchiveStatus != '1' ?
+        '<a class="delete-button" href="'.URL_BASE.'items/delete_item/" data-item-id="'.$this->model->data('itemID').'"><input class="btn-red" type="button" value="Delete Item" /></a>' : '';
+
+
     $output .= '<br /><div>'
-        .'<a href="'.URL_BASE.'items/update_item/'.$this->model->data('itemID').'/"><input type="button" value="Update Item" /></a>'
+        .$updateBtn
         .'<a href="'.URL_BASE.'items/view_all/"><input type="button" value="View other Items" /></a>'
+        .$deleteBtn
+        .'</div>';
+
+
+
+    /**
+     * Item Log
+     */
+    $output .= '<div style="max-height: 350px; overflow: auto; margin: 15px 0px 0px 0px; padding: 15px; border-radius: 5px; border: 1px solid #ccc; background: #ffffe5;">'
+        .$logV->getItemLog($itemID)
         .'</div>';
 
 

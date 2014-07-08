@@ -4,23 +4,24 @@ class loginController {
 
 private $model;
 
-public function __construct ($model) {
-    $this->model = $model;
+public function __construct ($model=null) {
+    if ( $model == null ) $this->model = new loginModel();
+    else $this->model = $model;
 } //__construct
 
 
 
 
 public function validateUser ($username, $password) {
-    $dbM = new databaseModel();
-    $dbC = new databaseController($dbM);
+    $dbC = new databaseController();
 
     /**
      * Check existence of the username
      */
     $results = $dbC->PDOStatement(array(
         'query' => "SELECT
-                acc.username
+                acc.account_id
+                ,acc.username
                 ,acc.password
                 ,acc.password_salt
                 ,acc.access_level AS access_level_id
@@ -53,7 +54,8 @@ public function validateUser ($username, $password) {
         if ( $encryptedPass === $dbPassword ) {
             $this->model->data('isAuthorized', true);
             $_SESSION['user'] = array(
-                    'username'          => $row['username']
+                    'accountID'         => $row['account_id']
+                    ,'username'         => $row['username']
                     ,'accessLevelID'    => $row['access_level_id']
                     ,'accessLevel'      => $row['access_level']
                     ,'firstname'        => $row['firstname']
@@ -70,10 +72,26 @@ public function validateUser ($username, $password) {
 
 
 
+
+
+
+
+
+
 public function logout () {
     session_destroy();
     header('location: '.URL_BASE);
 } //logout
+
+
+
+
+
+
+
+
+
+
 
 
 

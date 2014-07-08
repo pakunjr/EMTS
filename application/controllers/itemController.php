@@ -48,6 +48,12 @@ public function createItem ($datas=array()) {
     $errM = new errorModel();
     $errC = new errorController($errM);
 
+    $logC = new logController();
+
+
+    $ownshpM = new ownershipModel();
+    $ownshpC = new ownershipController($ownshpM);
+
     if ( !is_array($datas) ) {
         $errMsg = 'There was an error in saving. Item is not saved.';
         echo $errMsg;
@@ -71,18 +77,12 @@ public function createItem ($datas=array()) {
     $itemPackageID = $itemPackageID != null && $itemPackageID != '' ?
         $itemPackageID : '0';
 
-    //Item specifications
-    $itemSpecsProcessor = $datas['item-specs-processor'];
-    $itemSpecsVideo = $datas['item-specs-video'];
-    $itemSpecsDisplay = $datas['item-specs-display'];
-    $itemSpecsWebcam = $datas['item-specs-webcam'];
-    $itemSpecsAudio = $datas['item-specs-audio'];
-    $itemSpecsNetwork = $datas['item-specs-network'];
-    $itemSpecsUSBPort = $datas['item-specs-usbports'];
-    $itemSpecsMemory = $datas['item-specs-memory'];
-    $itemSpecsStorage = $datas['item-specs-storage'];
-    $itemSpecsOS = $datas['item-specs-os'];
-    $itemSpecsSoftware = $datas['item-specs-software'];
+    //Component information
+    $hasComponent = isset($datas['has-component']) ? '1' : '0';
+    $componentOf = isset($datas['is-component']) ?
+        $datas['item-search-id'] : '0';
+
+
 
     //Ownership information
     $ownerTypeID = $datas['owner-type'];
@@ -141,7 +141,9 @@ public function createItem ($datas=array()) {
                     ,date_of_purchase
                     ,package_id
                     ,is_archived
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
+                    ,has_components
+                    ,component_of
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)"
             ,'values'   => array(
                     $itemSerialNo
                     ,$itemModelNo
@@ -154,13 +156,19 @@ public function createItem ($datas=array()) {
                     ,$itemDatePurchase
                     ,array('int', $itemPackageID)
                     ,array('int', 0)
+                    ,array('int', $hasComponent)
+                    ,array('int', $componentOf)
                 )
         )) ? '1' : '0';
 
     if ( $itemResult != '1' ) {
         $itemID = null;
         $errC->logError('Item failed to be created');
-    } else $itemID = $this->dbC->PDOLastInsertID();
+        return false;
+    }
+
+    $itemID = $this->dbC->PDOLastInsertID();
+    $logC->logItem($itemID, 'create');
 
 
 
@@ -169,7 +177,7 @@ public function createItem ($datas=array()) {
      * Save ownership of the item if it is set
      */
     if ( $ownerType != 'none' ) {
-        $ownershipID = $this->newOwnershipID();
+        $ownershipID = $ownshpC->newOwnershipID();
         $ownershipResult = $this->dbC->PDOStatement(array(
             'query' => "INSERT INTO tbl_ownerships(
                     ownership_id
@@ -198,64 +206,7 @@ public function createItem ($datas=array()) {
     } else $ownershipResult = 'n/a';
 
 
-
-
-
-
-
-    /**
-     * Save specification of the item
-     */
-    if ( $this->itemTypeC->decode($itemType) == 'Devices' ) {
-        $specificationResult = $this->dbC->PDOStatement(array(
-            'query' => "INSERT INTO tbl_items_specification(
-                    item_id
-                    ,processor
-                    ,video
-                    ,display
-                    ,webcam
-                    ,audio
-                    ,network
-                    ,usb_ports
-                    ,memory
-                    ,storage
-                    ,os
-                    ,software
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)"
-            ,'values'   => array(
-                    array('int', $itemID)
-                    ,$itemSpecsProcessor
-                    ,$itemSpecsVideo
-                    ,$itemSpecsDisplay
-                    ,$itemSpecsWebcam
-                    ,$itemSpecsAudio
-                    ,$itemSpecsNetwork
-                    ,$itemSpecsUSBPort
-                    ,$itemSpecsMemory
-                    ,$itemSpecsStorage
-                    ,$itemSpecsOS
-                    ,$itemSpecsSoftware
-                )
-            )) ? '1' : '0';
-
-        if ( $specificationResult != '1' )
-            $errC->logError('Item specification failed to save while item is created');
-
-    } else $specificationResult = 'n/a';
-
-
-
-    /**
-     * Return results to be generated for display
-     */
-    $results = array(
-            'item'              => $itemResult
-            ,'specification'    => $specificationResult
-            ,'ownership'        => $ownershipResult
-            ,'itemID'           => $itemID
-        );
-
-    return $results;
+    return $itemID;
 
 } //createItem
 
@@ -304,7 +255,13 @@ public function updateItem ($datas=array()) {
     $errM = new errorModel();
     $errC = new errorController($errM);
 
+    $ownshpM = new ownershipModel();
+    $ownshpC = new ownershipController($ownshpM);
+
     $dbC = $this->dbC;
+
+    $logC = new logController();
+    $logNotes = '';
 
     $itemID = $datas['item-id'];
 
@@ -313,11 +270,13 @@ public function updateItem ($datas=array()) {
      * passed datas
      */
     $check = $dbC->PDOStatement(array(
-        'query' => "SELECT item_id FROM tbl_items WHERE item_id = ? LIMIT 1"
-        ,'values'   => array(array('int', $itemID))
+        'query' => "SELECT item_id FROM tbl_items WHERE item_id = ? AND is_archived = 0 LIMIT 1"
+        ,'values'   => array(
+                array('int', $itemID)
+            )
         ));
     if ( count($check) < 1 ) {
-        $errC->logError('Item update failed, item doesn\'t exist ( '.$itemID.' )');
+        $errC->logError('Item update failed, item doesn\'t exist or it is already archived ( '.$itemID.' )');
         return false;
     } else if ( !is_array($datas) ) {
         $errC->logError('Item update failed, data sent were not valid ( <a href="'.URL_BASE.'items/view/'.$itemID.'/"><input type="button" value="View Item" /></a> )');
@@ -339,18 +298,12 @@ public function updateItem ($datas=array()) {
     $itemPackageID = $itemPackageID != null && $itemPackageID != '' ?
         $itemPackageID : '0';
 
-    //Item specifications
-    $itemSpecsProcessor = $datas['item-specs-processor'];
-    $itemSpecsVideo = $datas['item-specs-video'];
-    $itemSpecsDisplay = $datas['item-specs-display'];
-    $itemSpecsWebcam = $datas['item-specs-webcam'];
-    $itemSpecsAudio = $datas['item-specs-audio'];
-    $itemSpecsNetwork = $datas['item-specs-network'];
-    $itemSpecsUSBPort = $datas['item-specs-usbports'];
-    $itemSpecsMemory = $datas['item-specs-memory'];
-    $itemSpecsStorage = $datas['item-specs-storage'];
-    $itemSpecsOS = $datas['item-specs-os'];
-    $itemSpecsSoftware = $datas['item-specs-software'];
+
+    //Component information
+    $hasComponent = isset($datas['has-component']) ? '1' : '0';
+    $componentOf = isset($datas['is-component']) ? $datas['item-search-id'] : '0';
+
+
 
     //Ownership information
     $ownerTypeID = $datas['owner-type'];
@@ -373,17 +326,131 @@ public function updateItem ($datas=array()) {
     /**
      * Update item information
      */
+    $infoResult = $dbC->PDOStatement(array(
+        'query' => "UPDATE tbl_items
+            SET item_serial_no = ?
+                ,item_model_no = ?
+                ,item_name = ?
+                ,item_type = ?
+                ,item_state = ?
+                ,item_description = ?
+                ,quantity = ?
+                ,quantity_unit = ?
+                ,date_of_purchase = ?
+                ,package_id = ?
+                ,has_components = ?
+                ,component_of = ?
+            WHERE item_id = ?"
+        ,'values'   => array(
+                $itemSerialNo
+                ,$itemModelNo
+                ,$itemName
+                ,array('int', $itemType)
+                ,array('int', $itemState)
+                ,$itemDescription
+                ,$itemQuantity
+                ,$itemQuantityUnit
+                ,$itemDatePurchase
+                ,array('int', $itemPackageID)
+                ,array('int', $hasComponent)
+                ,array('int', $componentOf)
+                ,array('int', $itemID)
+            )
+        ));
+
+
 
 
     /**
-     * Update item Specification
+     * Get the active ownership of the item then
+     * proceed with the update of the ownership
+     * if the owner is new
      */
 
+    $result = $dbC->PDOStatement(array(
+        'query' => "SELECT
+                ownership_id
+                ,owner_type
+                ,owner_id
+                ,date_of_possession
+            FROM tbl_ownerships
+            WHERE item_id = ? AND date_of_release = '0000-00-00'"
+        ,'values'   => array(array('int', $itemID))
+        ));
+    $row = count($result) > 0 ? $result[0] : array();
+    if ( (count($row) > 0 && (
+                $ownerTypeID != $row['owner_type']
+                || $ownerID != $row['owner_id']
+            ))
+            || count($row) < 1 ) {
 
-    /**
-     * Update item Ownership
-     */
 
+
+        if ( count($row) > 0 && $ownerDateOfPossession < $row['date_of_possession'] ) {
+            $possessionDate = date('Y-m-d');
+        } else {
+            $possessionDate = $ownerDateOfPossession;
+        }
+
+
+        /**
+         * Proceed with the update of the ownership
+         */
+
+        if ( count($row) > 0 ) {
+            $ownshpID = $row['ownership_id'];
+            $result = $dbC->PDOStatement(array(
+                'query' => "UPDATE tbl_ownerships
+                    SET date_of_release = ?
+                    WHERE ownership_id = ?"
+                ,'values'   => array(
+                        $possessionDate
+                        ,$ownshpID
+                    )
+                ));
+            $logNotes = PHP_EOL.'The ownership was released from '.$ownshpC->getOwnerName($ownshpID);
+        }
+
+        if ( $ownerType != 'none' ) {
+
+            $ownshpID = $ownshpC->newOwnershipID();
+            $ownershipResult = $dbC->PDOStatement(array(
+                'query' => "INSERT INTO tbl_ownerships(
+                        ownership_id
+                        ,owner_id
+                        ,owner_type
+                        ,item_id
+                        ,item_status
+                        ,date_of_possession
+                        ,date_of_release
+                    ) VALUES(
+                        ?,?,?,?,?,?,?
+                    )"
+                ,'values' => array(
+                        $ownshpID
+                        ,array('int', $ownerID)
+                        ,array('int', $ownerTypeID)
+                        ,array('int', $itemID)
+                        ,array('int', $itemState)
+                        ,$possessionDate
+                        ,'0000-00-00'
+                    )
+                ));
+
+
+            if ( !$ownershipResult ) {
+                $errC->logError('Ownership update failed. Item ID : ('.$itemID.', '.$itemName.')');
+            }
+
+            $logNotes .= PHP_EOL.'The ownership was transferred to '.$ownshpC->getOwnerName($ownshpID);
+
+        } else
+            $logNotes .= PHP_EOL.'There is no current owner of the item';
+
+    }
+
+
+    $logC->logItem($itemID, 'update', $logNotes);
 
     return $itemID;
 
@@ -432,6 +499,8 @@ public function archiveItem ($itemID) {
     $errM = new errorModel();
     $errC = new errorController($errM);
 
+    $logC = new logController();
+
     $result = $this->dbC->PDOStatement(array(
         'query' => "UPDATE tbl_items
             SET is_archived = ?
@@ -448,81 +517,11 @@ public function archiveItem ($itemID) {
         return false;
     }
 
+    $logC->logItem($itemID, 'archive');
+
     header('location: '.URL_BASE.'items/view_all/');
 } //archiveItem
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
- * Generate new ID that is used for ownership ID
- * ID Format: OSHP(xxxx)(xx)(xxxxx)
- * OSHP (year 4) (month 2) (sequence 5)
- * Length: 15 characters
- */
-public function newOwnershipID () {
-
-    $currentYear = date('Y');
-    $currentMonth = date('m');
-
-    /**
-     * Get the last ownership ID
-     */
-    $results = $this->dbC->PDOStatement(array(
-        'query' => "SELECT ownership_id
-            FROM tbl_ownerships
-            ORDER BY ownership_id DESC
-            LIMIT 1"
-        ,'values'   => array()
-        ));
-
-    $count = count($results);
-    if ( $count < 1 ) return 'OSHP'.$currentYear.$currentMonth.'00000';
-
-    $row = $results[0];
-    $lastID = $row['ownership_id'];
-
-    $parseYear = $lastID[4]
-        .$lastID[5]
-        .$lastID[6]
-        .$lastID[7];
-    $parseMonth = $lastID[8].$lastID[9];
-    $parseSequence = $lastID[10]
-        .$lastID[11]
-        .$lastID[12]
-        .$lastID[13]
-        .$lastID[14];
-    $parseSequence = (int)$parseSequence;
-
-    /**
-     * Do the sequencing
-     */
-    if ( $currentYear == $parseYear
-            && $currentMonth == $parseMonth ) {
-
-        $sequence = $parseSequence + 1;
-
-        for ( $i = strlen($sequence); $i < 5; $i++ ) {
-            $sequence = '0'.$sequence;
-        }
-
-    } else
-        $sequence = '00000';
-
-    $generatedID = 'OSHP'.$currentYear.$currentMonth.$sequence;
-    return $generatedID;
-
-} //newOwnershipID
 
 
 
@@ -560,18 +559,6 @@ public function readItem ($itemID) {
 
                 ,itemType.label AS item_type
 
-                ,specs.processor
-                ,specs.video
-                ,specs.display
-                ,specs.webcam
-                ,specs.audio
-                ,specs.network
-                ,specs.usb_ports
-                ,specs.memory
-                ,specs.storage
-                ,specs.os
-                ,specs.software
-
                 ,packages.package_id
                 ,packages.package_name
                 ,packages.package_serial_no
@@ -581,9 +568,7 @@ public function readItem ($itemID) {
             LEFT JOIN
                 lst_item_type AS itemType ON items.item_type = itemType.id
             LEFT JOIN
-                tbl_items_specification AS specs ON items.item_id = specs.item_id
-            LEFT JOIN
-                tbl_packages AS packages ON items.item_id = packages.package_id
+                tbl_packages AS packages ON items.package_id = packages.package_id
             LEFT JOIN
                 tbl_ownerships AS ownership ON items.item_id = ownership.item_id
             WHERE
@@ -617,7 +602,8 @@ public function readItem ($itemID) {
                 ,date_of_release
             FROM tbl_ownerships
             WHERE
-                item_id = ?"
+                item_id = ?
+            ORDER BY date_of_possession DESC, date_of_release ASC, ownership_id DESC"
         ,'values'   => array(array('int', $itemID))
         ));
 
@@ -663,17 +649,6 @@ public function readItem ($itemID) {
     $this->model->data('itemQuantity', $row['quantity']);
     $this->model->data('itemQuantityUnit', $row['quantity_unit']);
 
-    $this->model->data('itemSpecsProcessor', $row['processor']);
-    $this->model->data('itemSpecsVideo', $row['video']);
-    $this->model->data('itemSpecsDisplay', $row['display']);
-    $this->model->data('itemSpecsWebcam', $row['webcam']);
-    $this->model->data('itemSpecsAudio', $row['audio']);
-    $this->model->data('itemSpecsNetwork', $row['network']);
-    $this->model->data('itemSpecsUSBPorts', $row['usb_ports']);
-    $this->model->data('itemSpecsMemory', $row['memory']);
-    $this->model->data('itemSpecsStorage', $row['storage']);
-    $this->model->data('itemSpecsOS', $row['os']);
-    $this->model->data('itemSpecsSoftware', $row['software']);
 
     $this->model->data('packageID', $row['package_id']);
     $this->model->data('packageName', $row['package_name']);
@@ -816,6 +791,75 @@ public function readAll () {
 
     $this->model->data('itemList', $itemList);
 } //readAll
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public function searchPackageItem ($searchQuery) {
+    $dbC = new databaseController();
+
+    $itemList = array();
+
+    $results = $dbC->PDOStatement(array(
+        'query' => "SELECT
+                item_id
+                ,item_serial_no
+                ,item_model_no
+                ,item_name
+                ,date_of_purchase
+            FROM tbl_items
+            WHERE
+                has_components = ?
+                AND is_archived = ?
+                AND (
+                    item_name LIKE ?
+                    OR item_serial_no LIKE ?
+                    OR item_model_no LIKE ?
+                    )"
+        ,'values'   => array(
+                array('int', 1)
+                ,array('int', 0)
+                ,"%$searchQuery%"
+                ,"%$searchQuery%"
+                ,"%$searchQuery%"
+            )
+        ));
+
+    if ( count($results) < 1 ) {
+        $this->model->data('itemSearch', false);
+        return;
+    }
+
+    foreach ( $results as $result ) {
+        array_push($itemList, array(
+                'itemID' => $result['item_id']
+                ,'serialNo' => $result['item_serial_no']
+                ,'modelNo' => $result['item_model_no']
+                ,'name' => $result['item_name']
+                ,'dateOfPurchase' => $result['date_of_purchase']
+            ));
+    }
+
+    $this->model->data('itemSearch', $itemList);
+} //searchPackageItem
 
 
 

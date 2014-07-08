@@ -1,0 +1,4 @@
+Universal Hex colors
+Red: #f00
+Green: #053
+Blue: #03f

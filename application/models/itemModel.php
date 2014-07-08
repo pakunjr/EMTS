@@ -17,18 +17,6 @@ private $itemQuantity;
 private $itemQuantityUnit;
 
 
-private $itemSpecsProcessor;
-private $itemSpecsVideo;
-private $itemSpecsDisplay;
-private $itemSpecsWebcam;
-private $itemSpecsAudio;
-private $itemSpecsNetwork;
-private $itemSpecsUSBPorts;
-private $itemSpecsMemory;
-private $itemSpecsStorage;
-private $itemSpecsOS;
-private $itemSpecsSoftware;
-
 
 private $packageID;
 private $packageName;
@@ -47,6 +35,15 @@ private $currentOwner;
  * List all items in the database for viewing
  */
 private $itemList;
+
+
+
+/**
+ * Item search
+ */
+private $itemSearch;
+
+
 
 
 public function __construct () {

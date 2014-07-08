@@ -203,10 +203,11 @@ td {
 
 table.tabular-view th {
     text-align: center;
-    font-size: 0.8em;
+    font-size: 0.75em;
 }
 table.tabular-view td {
     text-align: left;
+    font-size: 0.8em;
 }
 table.tabular-view th,
 table.tabular-view td {

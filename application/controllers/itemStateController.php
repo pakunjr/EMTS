@@ -45,4 +45,21 @@ public function generateList () {
 
 
 
+
+
+
+
+
+public function decodeID ($itemID) {
+    $dbC = $this->dbC;
+    $result = $dbC->PDOStatement(array(
+        'query' => "SELECT label FROM lst_item_state WHERE id = ?"
+        ,'values'   => array(array('int', $itemID))
+        ));
+    return $result[0]['label'];
+} //decodeID
+
+
+
+
 }

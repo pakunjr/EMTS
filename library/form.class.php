@@ -69,11 +69,6 @@ class form {
      */
     public function hidden ($o=array()) {
         $output = '<input type="hidden"'.$this->parseAttributes($o).' />';
-        if ( isset($o['auto_line_break']) ) {
-            if ( $o['auto_line_break'] )
-                $output .= '<br />';
-        } else if ( $this->auto_line_break )
-            $output .= '<br />';
         return $output;
     } //hidden
 
@@ -82,12 +77,8 @@ class form {
 
     public function text ($o=array()) {
         $output = $this->renderLabel($o)
-                .'<input type="text"'.$this->parseAttributes($o).' />';
-        if ( isset($o['auto_line_break']) ) {
-            if ( $o['auto_line_break'] )
-                $output .= '<br />';
-        } else if ( $this->auto_line_break )
-            $output .= '<br />';
+                .'<input type="text"'.$this->parseAttributes($o).' />'
+                .$this->autoLineBreak($o);
         return $output;
     } // text
 
@@ -99,14 +90,10 @@ class form {
         $e = array('value');
         $value = isset($o['value']) ? $o['value'] : '';
         $output = $this->renderLabel($o)
-                .'<textarea'.$this->parseAttributes($o, $e).'>'.$value.'</textarea>';
-        if ( isset($o['auto_line_break']) ) {
-            if ( $o['auto_line_break'] )
-                $output .= '<br />';
-        } else if ( $this->auto_line_break )
-            $output .= '<br />';
+                .'<textarea'.$this->parseAttributes($o, $e).'>'.$value.'</textarea>'
+                .$this->autoLineBreak($o);
         return $output;
-    } // End function textarea
+    } //textarea
 
 
 
@@ -114,14 +101,10 @@ class form {
 
     public function password ($o=array()) {
         $output = $this->renderLabel($o)
-                .'<input type="password"'.$this->parseAttributes($o).' />';
-        if ( isset($o['auto_line_break']) ) {
-            if ( $o['auto_line_break'] )
-                $output .= '<br />';
-        } else if ( $this->auto_line_break )
-            $output .= '<br />';
+                .'<input type="password"'.$this->parseAttributes($o).' />'
+                .$this->autoLineBreak($o);
         return $output;
-    } // End function password
+    } //password
 
 
 
@@ -151,14 +134,10 @@ class form {
         $output = $this->renderLabel($o)
                 .'<select'.$this->parseAttributes($o, $e).'>'
                 .$select_options
-                .'</select>';
-        if ( isset($o['auto_line_break']) ) {
-            if ( $o['auto_line_break'] )
-                $output .= '<br />';
-        } else if ( $this->auto_line_break )
-            $output .= '<br />';
+                .'</select>'
+                .$this->autoLineBreak($o);
         return $output;
-    } // End function select
+    } //select
 
 
 
@@ -167,14 +146,27 @@ class form {
     public function radio ($o=array()) {
         $e = array('placeholder');
         $output = $this->renderLabel($o)
-                .'<input type="radio"'.$this->parseAttributes($o, $e).' />';
-        if ( isset($o['auto_line_break']) ) {
-            if ( $o['auto_line_break'] )
-                $output .= '<br />';
-        } else if ( $this->auto_line_break )
-            $output .= '<br />';
+                .'<input type="radio"'.$this->parseAttributes($o, $e).' />'
+                .$this->autoLineBreak($o);
         return $output;
-    } // End function radio
+    } //radio
+
+
+
+
+    public function checkbox ($o=array()) {
+        $e = array('placeholder', 'checked');
+
+        $checkAttr = '';
+        if ( isset($o['checked']) ) {
+            if ( $o['checked'] ) $checkAttr = ' checked="checked"';
+        }
+
+        $output = $this->renderLabel($o)
+            .'<input type="checkbox"'.$checkAttr.$this->parseAttributes($o, $e).' />'
+            .$this->autoLineBreak($o);
+        return $output;
+    } //checkbox
 
 
 
@@ -182,14 +174,10 @@ class form {
 
     public function button ($o=array()) {
         $e = array('placeholder');
-        $output = '<input type="button"'.$this->parseAttributes($o, $e).' />';
-        if ( isset($o['auto_line_break']) ) {
-            if ( $o['auto_line_break'] )
-                $output .= '<br />';
-        } else if ( $this->auto_line_break )
-            $output .= '<br />';
+        $output = '<input type="button"'.$this->parseAttributes($o, $e).' />'
+            .$this->autoLineBreak($o);
         return $output;
-    } // End function button
+    } //button
 
 
 
@@ -197,14 +185,10 @@ class form {
 
     public function reset ($o=array()) {
         $e = array('placeholder');
-        $output = '<input type="reset"'.$this->parseAttributes($o, $e).' />';
-        if ( isset($o['auto_line_break']) ) {
-            if ( $o['auto_line_break'] )
-                $output .= '<br />';
-        } else if ( $this->auto_line_break )
-            $output .= '<br />';
+        $output = '<input type="reset"'.$this->parseAttributes($o, $e).' />'
+            .$this->autoLineBreak($o);
         return $output;
-    } // End function reset
+    } //reset
 
 
 
@@ -212,14 +196,10 @@ class form {
 
     public function submit ($o=array()) {
         $e = array('placeholder');
-        $output = '<input type="submit"'.$this->parseAttributes($o, $e).' />';
-        if ( isset($o['auto_line_break']) ) {
-            if ( $o['auto_line_break'] )
-                $output .= '<br />';
-        } else if ( $this->auto_line_break )
-            $output .= '<br />';
+        $output = '<input type="submit"'.$this->parseAttributes($o, $e).' />'
+            .$this->autoLineBreak($o);
         return $output;
-    } // End function submit
+    } //submit
 
 
 
@@ -271,7 +251,7 @@ class form {
                 $tmp_attr .= ' '.$n.'="'.$v.'"';
         }
         return $tmp_attr;
-    } // End function parseAttributes
+    } //parseAttributes
 
 
 
@@ -293,5 +273,20 @@ class form {
                 .$label
                 .'</label>';
         return $output;
-    } // End function renderLabel
+    } //renderLabel
+
+
+
+
+
+    /**
+     * Render auto line break
+     */
+    private function autoLineBreak ($o=array()) {
+        if ( isset($o['auto_line_break']) ) {
+            if ( $o['auto_line_break'] )
+                return '<br />';
+        } else if ( $this->auto_line_break ) return '<br />';
+        else return '';
+    } //autoLineBreak
 }

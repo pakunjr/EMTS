@@ -28,14 +28,14 @@ public function generateList () {
         $list = array();
         $results = $this->dbC->PDOStatement(array(
             'query' => "SELECT *
-                FROM lst_ownership_type"
+                FROM lst_owner_type"
             ,'values'   => array()
             ));
         foreach ( $results as $result ) {
             array_push($list, array(
                     'id'    => $result['id']
-                    ,'label'    => $result['ownership_label']
-                    ,'description'  => $result['ownership_description']
+                    ,'label'    => $result['owner_label']
+                    ,'description'  => $result['owner_description']
                 ));
         }
         $GLOBALS['cache']->set('ownerType_list', $list, 3600*24);
@@ -50,19 +50,19 @@ public function generateList () {
 public function decodeID ($id) {
     $result = $this->dbC->PDOStatement(array(
         'query' => "SELECT
-                ownership_label
-            FROM lst_ownership_type
+                owner_label
+            FROM lst_owner_type
             WHERE
                 id = ?
             LIMIT 1"
         ,'values'   => array(array('int', $id))
         ));
-    return count($result) > 0 ? $result[0]['ownership_label'] : '';
+    return count($result) > 0 ? $result[0]['owner_label'] : '';
 } //decodeID
 
 public function decodeLabel ($label) {
     $result = $this->dbC->PDOStatement(array(
-        'query' => "SELECT id FROM lst_ownership_type WHERE ownership_label = ?"
+        'query' => "SELECT id FROM lst_owner_type WHERE owner_label = ?"
         ,'values'   => array($label)
         ));
     return count($result) > 0 ? $result[0]['id'] : '';

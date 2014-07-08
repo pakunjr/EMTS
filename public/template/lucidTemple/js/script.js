@@ -356,6 +356,7 @@ var popAlert = function ( alertType, alertOptions ) {
 
     $pContent.css({
         'display': 'inline-block'
+        ,'min-width': '250px'
         ,'max-width': '400px'
         ,'margin-top':
             ($(window).height() / 2)

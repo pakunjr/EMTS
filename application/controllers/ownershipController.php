@@ -26,6 +26,95 @@ public function __construct ($model) {
 
 
 
+
+
+
+
+
+/**
+ * Generate new ID that is used for ownership ID
+ * ID Format: OSHP(xxxx)(xx)(xxxxx)
+ * OSHP (year 4) (month 2) (sequence 5)
+ * Length: 15 characters
+ */
+public function newOwnershipID () {
+
+    $currentYear = date('Y');
+    $currentMonth = date('m');
+
+    /**
+     * Get the last ownership ID
+     */
+    $results = $this->dbC->PDOStatement(array(
+        'query' => "SELECT ownership_id
+            FROM tbl_ownerships
+            ORDER BY ownership_id DESC
+            LIMIT 1"
+        ,'values'   => array()
+        ));
+
+    $count = count($results);
+    if ( $count < 1 ) return 'OSHP'.$currentYear.$currentMonth.'00000';
+
+    $row = $results[0];
+    $lastID = $row['ownership_id'];
+
+    $parseYear = $lastID[4]
+        .$lastID[5]
+        .$lastID[6]
+        .$lastID[7];
+    $parseMonth = $lastID[8].$lastID[9];
+    $parseSequence = $lastID[10]
+        .$lastID[11]
+        .$lastID[12]
+        .$lastID[13]
+        .$lastID[14];
+    $parseSequence = (int)$parseSequence;
+
+    /**
+     * Do the sequencing
+     */
+    if ( $currentYear == $parseYear
+            && $currentMonth == $parseMonth ) {
+
+        $sequence = $parseSequence + 1;
+
+        for ( $i = strlen($sequence); $i < 5; $i++ ) {
+            $sequence = '0'.$sequence;
+        }
+
+    } else
+        $sequence = '00000';
+
+    $generatedID = 'OSHP'.$currentYear.$currentMonth.$sequence;
+    return $generatedID;
+
+} //newOwnershipID
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Get the owner information using the
  * ownership information
@@ -34,9 +123,9 @@ public function getOwnerInformation ($ownershipID) {
     $ownershipResult = $this->dbC->PDOStatement(array(
         'query' => "SELECT
                 ownshp.owner_id
-                ,ownshpType.ownership_label AS owner_type
+                ,ownshpType.owner_label AS owner_type
             FROM tbl_ownerships AS ownshp
-            LEFT JOIN lst_ownership_type AS ownshpType ON ownshp.owner_type = ownshpType.id
+            LEFT JOIN lst_owner_type AS ownshpType ON ownshp.owner_type = ownshpType.id
             WHERE
                 ownership_id = ?
             LIMIT 1"
@@ -184,6 +273,17 @@ public function getOwnerInformation ($ownershipID) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Get the name / label only of the owner
  */
@@ -224,6 +324,24 @@ public function getOwnerName ($ownershipID) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public function searchOwners ($searchKeyword) {
 
     $ownerList = array();
@@ -237,9 +355,9 @@ public function searchOwners ($searchKeyword) {
     $results = $this->dbC->PDOStatement(array(
         'query' => "SELECT
                 ownshp.owner_id
-                ,ownshpType.ownership_label AS owner_type
+                ,ownshpType.owner_label AS owner_type
             FROM tbl_ownerships AS ownshp
-            LEFT JOIN lst_ownership_type AS ownshpType ON ownshp.owner_type = ownshpType.id
+            LEFT JOIN lst_owner_type AS ownshpType ON ownshp.owner_type = ownshpType.id
             GROUP BY
                 ownshp.owner_id
                 ,ownshp.owner_type"

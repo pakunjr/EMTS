@@ -4,8 +4,9 @@ class errorController {
 
 private $model;
 
-public function __construct ($model) {
-    $this->model = $model;
+public function __construct ($model=null) {
+    if ( $model == null ) $this->model = new errorModel();
+    else $this->model = $model;
 } //__construct
 
 
