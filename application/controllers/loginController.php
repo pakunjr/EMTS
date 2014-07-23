@@ -99,4 +99,11 @@ public function encryptPassword ($password, $salt) {
     return hash('sha256', $password.$salt);
 } //encryptPassword
 
+
+
+
+
+
+
+
 }

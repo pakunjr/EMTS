@@ -72,7 +72,7 @@ public function renderFrontpage ($echo=false) {
  */
 public function renderSearch ($echo=false) {
 
-    $renderedResults = '<table>'
+    $output = '<table>'
         .'<tr>'
             .'<th>Name</th>'
             .'<th>Gender</th>'
@@ -84,19 +84,22 @@ public function renderSearch ($echo=false) {
 
     if ( !is_array($searchList) ) return false;
 
-    foreach ( $searchList as $informations ) {
-        $renderedResults .= '<tr class="search-data">';
-        foreach ( $informations as $info ) {
-            $renderedResults .= '<td>'.$info.'</td>';
-        }
-        $renderedResults .= '</tr>';
+    foreach ( $searchList as $info ) {
+        $output .= '<tr class="search-data">'
+            .'<td>'
+                .'<input class="prime-data" type="hidden" value="'.$info['id'].'" />'
+                .'<span class="prime-label">'.$info['name'].'</span>'
+            .'</td>'
+            .'<td>'.$info['gender'].'</td>'
+            .'<td>'.$info['birthdate'].'</td>'
+            .'<td>'.$info['emailAddress'].'</td>'
+            .'</tr>';
     }
 
+    $output .= '</table>';
 
-    $renderedResults .= '</table>';
-
-    if ( !$echo ) return $renderedResults;
-    echo $renderedResults;
+    if ( !$echo ) return $output;
+    echo $output;
 
 } //renderSearch
 

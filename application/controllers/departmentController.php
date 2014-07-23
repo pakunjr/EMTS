@@ -34,15 +34,14 @@ public function searchDepartment ($searchQuery) {
     $result = $dbC->query($sqlQuery);
     while ( $row = $result->fetch_assoc() ) {
         $info = array(
-                $row['department_name_short']
-                ,'<input type="hidden" class="search-result-identifier" value="'.$row['department_id'].'" />'
-                .'<span class="search-result-label">'.$row['department_name'].'</span>'
-                ,$row['lastname'].', '
-                .$row['firstname'].' '
-                .$row['middlename'].' '
-                .$row['suffix']
+                'id'        => $row['department_id']
+                ,'short'    => $row['department_name_short']
+                ,'name'     => $row['department_name']
+                ,'head'     => $row['lastname'].', '
+                    .$row['firstname'].' '
+                    .$row['middlename'].' '
+                    .$row['suffix']
             );
-
         array_push($searchList, $info);
     }
 

@@ -5,8 +5,8 @@ class packageController {
 
 private $model;
 
-public function __construct ($model) {
-    $this->model = $model;
+public function __construct ($model=null) {
+    $this->model = $model != null ? $model : new packageModel();
 } //__construct
 
 
@@ -37,11 +37,10 @@ public function searchPackage ($searchQuery) {
 
     foreach ( $results as $row ) {
         $info = array(
-                '<input type="hidden" class="search-result-identifier" value="'.$row['package_id'].'" />'
-                .'<span class="search-result-label">'
-                .$row['package_name'].' ('.$row['package_serial_no'].')'
-                .'</span>'
-                ,$row['date_of_purchase']
+                'id'    => $row['package_id']
+                ,'name' => $row['package_name']
+                ,'serialNo'     => $row['package_serial_no']
+                ,'purchaseDate' => $row['date_of_purchase']
             );
         array_push($searchList, $info);
     }
@@ -49,6 +48,31 @@ public function searchPackage ($searchQuery) {
     $this->model->data('searchList', $searchList);
 
 } //searchPackage
+
+
+
+
+
+
+
+
+
+
+
+public function idToLabel ($packageId) {
+
+    $dbC = new databaseController();
+
+    $result = $dbC->PDOStatement(array(
+        'query' => "SELECT package_name, package_serial_no
+            FROM tbl_packages
+            WHERE package_id = ?"
+        ,'values'   => array(intval($packageId))
+        ));
+
+    return count($result) > 0 ? $result[0]['package_name'].' ( '.$result[0]['package_serial_no'].' )' : '';
+
+} //idToLabel
 
 
 
@@ -72,7 +96,7 @@ public function getPackageName ($packageID) {
             FROM tbl_packages
             WHERE package_id = ?
             LIMIT 1"
-        ,'values'   => array(array('int', $packageID))
+        ,'values'   => array(intval($packageID))
         ));
     if ( count($result) < 1 ) return '';
     $result = $result[0];

@@ -51,12 +51,16 @@ public function renderSearch ($echo=false) {
             .'<th>Head</th>'
         .'</tr>';
 
-    foreach ( $searchList as $informations ) {
-        $searchResult .= '<tr class="search-data">';
-        foreach ( $informations as $info ) {
-            $searchResult .= '<td>'.$info.'</td>';
-        }
-        $searchResult .= '</tr>';
+    foreach ( $searchList as $info ) {
+        $searchResult .= '<tr class="search-data">'
+            .'<td>'
+                .'<input class="prime-data" type="hidden" value="'.$info['id'].'" />'
+                .'<span class="prime-label hidden">'.$info['short'].' ('.$info['name'].')</span>'
+                .$info['short']
+            .'</td>'
+            .'<td>'.$info['name'].'</td>'
+            .'<td>'.$info['head'].'</td>'
+            .'</tr>';
     }
 
     $searchResult .= '</table>';

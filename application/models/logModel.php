@@ -2,6 +2,10 @@
 
 class logModel {
 
+
+private $logContent;
+
+
 public function __construct () {
 
 } //__construct

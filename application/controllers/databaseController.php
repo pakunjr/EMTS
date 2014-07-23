@@ -5,8 +5,7 @@ class databaseController {
 private $model;
 
 public function __construct ($model=null) {
-    if ( $model == null ) $this->model = new databaseModel();
-    else $this->model = $model;
+    $this->model = $model != null ? $model : new databaseModel();
 } //__construct
 
 
@@ -146,16 +145,17 @@ public function PDOStatement ($options=array()) {
     $this->PDOConnect();
     $connection = $this->model->data('connection');
 
-    $query = $options['query'];
-    $values = $options['values'];
+    $query = isset($options['query']) ? $options['query'] : '';
+    $values = isset($options['values']) && is_array($options['values'])
+        ? $options['values']
+        : array();
 
     try {
         $stmt = $connection->prepare($query);
         if ( !$stmt )
             throw new PDOException('PDOException: Failed to prepared the query');
     } catch (PDOException $e) {
-        $errC->logError($e->getMessage());
-        $errC->logError('Failed to prepare the SQL Query ( '.$query.' )');
+        $errC->logError($e->getMessage().'<br /><br />SQL Query:<br />'.$query);
     }
 
     /**
@@ -165,50 +165,29 @@ public function PDOStatement ($options=array()) {
     $placeholder = 0;
     foreach ( $values as $value ) {
 
-        /**
-         * HOW TO:
-         *
-         * if the value is an array and the first index[0] value
-         * is either 'int' or 'string', treat the first index[0]
-         * as the type instead of placeholder and vice versa
-         *
-         * if the value is only a variable or string, treat
-         * it as string and assume placeholders as question
-         * marks
-         */
-
         $valType = gettype($value);
 
         if ( $valType == 'array' ) {
             $phValue = $value[1];
-            if ( $value[0] == 'string' || $value[0] == 'int' ) {
-                $placeholder++;
-                $type = $value[0];
-            } else {
-                $placeholder = $value[0];
-                $type = isset($value[2]) ? $value[2] : 'string';
-            }
-        } else if ( $valType == 'string' || $valType == 'int' ) {
+            $placeholder = $value[0];
+            $type = gettype($value[1]);
+        } else if ( $valType == 'string' || $valType == 'integer' ) {
             $phValue = $value;
-            $type = 'string';
+            $type = gettype($value);
             $placeholder++;
-        } else {
-            $errC->logError('Unknown value passed into the query ( '.$value.' )');
-        }
+        } else
+            $errC->logError('Invalid value type.<br />Type: '.$valType.'<br />Value: '.$value);
 
-        if ( $type == 'string' ) {
-            $type = PDO::PARAM_STR;
-            $phValue = strval($phValue);
-        } else if ( $type == 'int' ) {
+        if ( $type == 'integer' ) {
             $type = PDO::PARAM_INT;
             $phValue = intval($phValue);
+        } else {
+            $type = PDO::PARAM_STR;
+            $phValue = strval($phValue);
         }
 
         $bindResult = $stmt->bindValue($placeholder, $phValue, $type) ?
             '1' : '0';
-
-        if ( $bindResult != '1' )
-            $errC->logError('Failed to bind paramter / value for '.$phValue);
 
     }
 
@@ -237,8 +216,7 @@ public function PDOStatement ($options=array()) {
         } else return false;
 
     } catch (PDOException $e) {
-        $errC->logError($e->getMessage());
-        $errC->logError('SQL query is not processed ( '.$query.' )');
+        $errC->logError($e->getMessage().'<br /><br />SQL Query:<br />'.$query);
     }
 
 } //PDOStatement

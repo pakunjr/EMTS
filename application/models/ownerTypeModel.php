@@ -8,6 +8,8 @@ private $ownerTypeDescription;
 
 private $list;
 
+private $selectOptions; //used for select form elements
+
 public function __construct () {
 
 } //__construct

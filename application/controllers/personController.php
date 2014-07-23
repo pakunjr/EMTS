@@ -94,20 +94,16 @@ public function searchPerson ($searchQuery, $searchType='employee') {
         ));
 
     foreach ( $results as $row ) {
-        $tmpGender = ( $row['gender'] == 'm' ) ?
-            'Male' : 'Female';
-
         $info = array(
-                '<input class="search-result-identifier" type="hidden" value="'.$row['owner_id'].'" />'
-                .'<span class="search-result-label">'
-                .$row['lastname'].', '
-                .$row['firstname'].' '
-                .$row['middlename'].' '
-                .$row['suffix']
-                .'</span>'
-                ,$tmpGender
-                ,$row['birthdate']
-                ,$row['email_address']
+                'id'   => $row['owner_id']
+                ,'name'    => $row['lastname'].', '
+                    .$row['firstname'].' '
+                    .$row['middlename'].' '
+                    .$row['suffix']
+                ,'gender'       => $row['gender'] == 'm'
+                    ? 'Male' : 'Female'
+                ,'birthdate'    => $row['birthdate']
+                ,'emailAddress' => $row['email_address']
             );
         array_push($searchList, $info);
     }

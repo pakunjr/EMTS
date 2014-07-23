@@ -14,25 +14,38 @@ public function displayLog () {
 
 
     $fileContent = file_get_contents($this->model->data('filepath'));
-    $fileContent = explode(' &newline;', $fileContent);
-    unset($fileContent[count($fileContent) - 1]);
+    $fileContent = unserialize($fileContent);
+    $fileContent = is_array($fileContent) ? $fileContent : array();
 
+    if ( count($fileContent) > 0 ) {
 
+        $renderedContent = '<table><tr>'
+            .'<th>#</th>'
+            .'<th>Error Details</th>'
+            .'</tr>';
+        $count = 1;
+        foreach ( $fileContent as $a ) {
+            $renderedContent .= '<tr>'
+                .'<td>'.$count.'</td>'
+                .'<td>'.$a.'</td>'
+                .'</tr>';
+            $count++;
+        }
+        $renderedContent .= '</table>';
+        $cleanBtn = '<a id="error-log-cleaner" href="'.URL_BASE.'admin/log/clean/"><input type="button" value="Clean Log" /></a>';
 
-    $renderedContent = '';
-    $count = 1;
-    foreach ( $fileContent as $a ) {
-        $renderedContent .= '<b>'.$count.'</b>. '.$a.'<br />';
-        $count++;
+    } else {
+
+        $renderedContent = 'No error/s have been logged as of yet.';
+        $cleanBtn = '';
+
     }
-
-
 
     $contents = 'Errors and Exceptions encountered and logged by the system:<hr />'
         .'<div style="font-size: 0.9em;">'
         .$renderedContent
         .'<hr />'
-        .'<a id="error-log-cleaner" href="'.URL_BASE.'admin/log/clean/"><input type="button" value="Clean Log" /></a>'
+        .$cleanBtn
         .'<a href="'.URL_BASE.'admin/log/errors/"><input type="button" value="Refresh" /></a>'
         .'</div>';
     echo $contents;
@@ -41,17 +54,21 @@ public function displayLog () {
     ?>
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#error-log-cleaner').click(function () {
-                var $this = $(this);
-                popAlert('confirm', {
-                    'message': 'Do you want to clean the log?<br />'
-                        +'This is undoable.'
-                    ,'action': function () {
-                        window.location = $this.attr('href');
-                    }
+            if ( $('#error-log-cleaner').length > 0 ) {
+
+                $('#error-log-cleaner').click(function () {
+                    var $this = $(this);
+                    popAlert('confirm', {
+                        'message': 'Do you want to clean the log?<br />'
+                            +'This is undoable.'
+                        ,'action': function () {
+                            window.location = $this.attr('href');
+                        }
+                    });
+                    return false;
                 });
-                return false;
-            });
+
+            }
         });
     </script>
     <?php

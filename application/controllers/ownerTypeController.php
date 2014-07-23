@@ -5,31 +5,21 @@ class ownerTypeController {
 
 private $model;
 
-private $dbM;
-private $dbV;
-private $dbC;
-
-
-public function __construct ($model) {
-    $this->model = $model;
-
-    $this->dbM = new databaseModel();
-    $this->dbV = new databaseView($this->dbM);
-    $this->dbC = new databaseController($this->dbM);
+public function __construct ($model=null) {
+    $this->model = $model != null ? $model : new ownerTypeModel();
 } //__construct
 
 
 
 
 
-public function generateList () {
+public function selectOptions () {
+    $dbC = new databaseController();
     $list = $GLOBALS['cache']->get('ownerType_list');
     if ( $list == null ) {
         $list = array();
-        $results = $this->dbC->PDOStatement(array(
-            'query' => "SELECT *
-                FROM lst_owner_type"
-            ,'values'   => array()
+        $results = $dbC->PDOStatement(array(
+            'query' => "SELECT * FROM lst_owner_type"
             ));
         foreach ( $results as $result ) {
             array_push($list, array(
@@ -40,33 +30,62 @@ public function generateList () {
         }
         $GLOBALS['cache']->set('ownerType_list', $list, 3600*24);
     }
-    $this->model->data('list', $list);
-} //generateList
+    $this->model->data('selectOptions', $list);
+} //selectOptions
 
 
 
 
 
-public function decodeID ($id) {
-    $result = $this->dbC->PDOStatement(array(
-        'query' => "SELECT
-                owner_label
-            FROM lst_owner_type
-            WHERE
-                id = ?
-            LIMIT 1"
-        ,'values'   => array(array('int', $id))
+
+public function getList ($listType=null) {
+
+    $dbC = new databaseController();
+
+    $results = $dbC->PDOStatement(array(
+        'query' => "SELECT * FROM lst_owner_type"
         ));
-    return count($result) > 0 ? $result[0]['owner_label'] : '';
-} //decodeID
 
-public function decodeLabel ($label) {
-    $result = $this->dbC->PDOStatement(array(
-        'query' => "SELECT id FROM lst_owner_type WHERE owner_label = ?"
-        ,'values'   => array($label)
+    $list = array();
+    foreach ( $results as $result ) {
+        if ( $listType == 'select_options' )
+            $list[$result['owner_label']] = $result['id'];
+        else {
+            array_push($list, array(
+                    'id'            => $result['id']
+                    ,'label'        => $result['owner_label']
+                    ,'description'  => $result['owner_description']
+                ));
+        }
+    }
+
+    return $list;
+
+} //getList
+
+
+
+
+
+
+
+
+
+
+public function idToLabel ($id) {
+    $dbC = new databaseController();
+
+    $results = $dbC->PDOStatement(array(
+        'query'     => "SELECT owner_label FROM lst_owner_type WHERE id=?"
+        ,'values'   => array(intval($id))
         ));
-    return count($result) > 0 ? $result[0]['id'] : '';
-} //decodeLabel
+
+    return count($results) > 0
+        ? $results[0]['owner_label']
+        : '';
+} //idToLabel
+
+
 
 
 

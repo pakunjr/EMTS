@@ -9,8 +9,8 @@ private $dbM;
 private $dbV;
 private $dbC;
 
-public function __construct ($model) {
-    $this->model = $model;
+public function __construct ($model=null) {
+    $this->model = $model != null ? $model : new ownershipModel();
 
 
     $this->dbM = new databaseModel();
@@ -50,7 +50,6 @@ public function newOwnershipID () {
             FROM tbl_ownerships
             ORDER BY ownership_id DESC
             LIMIT 1"
-        ,'values'   => array()
         ));
 
     $count = count($results);
@@ -160,7 +159,7 @@ public function getOwnerInformation ($ownershipID) {
                 WHERE
                     employees.employee_id = ?
                 LIMIT 1"
-            ,'values'   => array(array('int', $ownerID))
+            ,'values'   => array(intval($ownerID))
             ));
         $row = $result[0];
         return array(
@@ -199,7 +198,7 @@ public function getOwnerInformation ($ownershipID) {
                 WHERE
                     departments.department_id = ?
                 LIMIT 1"
-            ,'values'   => array(array('int', $ownerID))
+            ,'values'   => array(intval($ownerID))
             ));
         $row = $result[0];
         return array(
@@ -236,7 +235,7 @@ public function getOwnerInformation ($ownershipID) {
                 WHERE
                     guests.guest_id = ?
                 LIMIT 1"
-            ,'values'   => array(array('int', $ownerID))
+            ,'values'   => array(intval($ownerID))
             ));
         $row = $result[0];
         return array(
@@ -288,6 +287,7 @@ public function getOwnerInformation ($ownershipID) {
  * Get the name / label only of the owner
  */
 public function getOwnerName ($ownershipID) {
+
     $ownerInfo = $this->getOwnerInformation($ownershipID);
 
     switch ( $ownerInfo['ownerType'] ) {
@@ -295,20 +295,18 @@ public function getOwnerName ($ownershipID) {
             return $ownerInfo['lastname'].', '.$ownerInfo['firstname'].' '.$ownerInfo['middlename'].' '.$ownerInfo['suffix'];
             break;
 
-
         case 'department':
             return $ownerInfo['departmentShort'].' ('.$ownerInfo['departmentName'].')';
             break;
-
 
         case 'guest':
             return $ownerInfo['lastname'].', '.$ownerInfo['firstname'].' '.$ownerInfo['middlename'].' '.$ownerInfo['suffix'];
             break;
 
-
         default:
             return 'None';
     }
+
 } //getOwnerName
 
 
@@ -316,6 +314,106 @@ public function getOwnerName ($ownershipID) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public function newOwnership ($datas) {
+
+    $dbC = new databaseController();
+    $ownerTypeC = new ownerTypeController();
+
+    $ownerType = $ownerTypeC->idToLabel($datas['owner-type']);
+    switch ( $ownerType ) {
+
+        case 'Employee':
+            $ownerID = $datas['employee-id'];
+            break;
+
+        case 'Department':
+            $ownerID = $datas['department-id'];
+            break;
+
+        case 'Guest':
+            $ownerID = $datas['guest-id'];
+            break;
+
+        default:
+            $ownerID = null;
+
+    }
+
+    $ownershipID = $this->newOwnershipID();
+    $status = $dbC->PDOStatement(array(
+        'query' => "INSERT INTO tbl_ownerships (
+                ownership_id
+                ,owner_id
+                ,owner_type
+                ,item_id
+                ,item_status
+                ,date_of_possession
+                ,date_of_release
+            ) VALUES (?,?,?,?,?,?,?)"
+        ,'values'   => array(
+                $ownershipID
+                ,intval($ownerID)
+                ,intval($datas['owner-type'])
+                ,intval($datas['item-id'])
+                ,intval($datas['item-state'])
+                ,$datas['date-of-possession']
+                ,'0000-00-00'
+            )
+        ));
+
+    return $status ? $ownershipID : null;
+
+} //newOwnership
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public function endOwnership ($ownershipID) {
+
+    $dbC = new databaseController();
+
+    $endStatus = $dbC->PDOStatement(array(
+        'query' => "UPDATE tbl_ownerships
+            SET date_of_release = ?
+            WHERE ownership_id = ?"
+        ,'values'   => array(
+                date('Y-m-d')
+                ,$ownershipID
+            )
+        ));
+
+    return $endStatus;
+
+} //endOwnership
 
 
 
@@ -361,7 +459,6 @@ public function searchOwners ($searchKeyword) {
             GROUP BY
                 ownshp.owner_id
                 ,ownshp.owner_type"
-        ,'values'   => array()
         ));
     foreach ( $results as $ownshpRow ) {
         $ownshpRow['owner_type'] = strtolower($ownshpRow['owner_type']);
@@ -405,7 +502,7 @@ public function searchOwners ($searchKeyword) {
                         OR persons.suffix LIKE ?
                     )"
             ,'values'   => array(
-                    array('int', $ownerID)
+                    intval($ownerID)
                     ,"%$searchKeyword%"
                     ,"%$searchKeyword%"
                     ,"%$searchKeyword%"
@@ -439,7 +536,7 @@ public function searchOwners ($searchKeyword) {
                         OR department_name_short LIKE ?
                     )"
             ,'values'   => array(
-                    array('int', $ownerID)
+                    intval($ownerID)
                     ,"%$searchKeyword%"
                     ,"%$searchKeyword%"
                 )
@@ -477,7 +574,7 @@ public function searchOwners ($searchKeyword) {
                         OR persons.suffix LIKE ?
                     )"
             ,'values'   => array(
-                    array('int', $ownerID)
+                    intval($ownerID)
                     ,"%$searchKeyword%"
                     ,"%$searchKeyword%"
                     ,"%$searchKeyword%"

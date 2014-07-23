@@ -8,8 +8,8 @@ private $dbM;
 private $dbV;
 private $dbC;
 
-public function __construct ($model) {
-    $this->model = $model;
+public function __construct ($model=null) {
+    $this->model = $model != null ? $model : new itemStateModel();
 
     $this->dbM = new databaseModel();
     $this->dbV = new databaseView($this->dbM);
@@ -21,26 +21,32 @@ public function __construct ($model) {
 
 
 
-public function generateList () {
-    $list = $GLOBALS['cache']->get('itemState_list');
-    if ( $list == null ) {
-        $list = array();
 
-        $results = $this->dbC->PDOStatement(array(
-            'query' => "SELECT id, label, description FROM lst_item_state"
-            ,'values'   => array()
-            ));
-        foreach ( $results as $result ) {
+
+public function getList ($listType=null) {
+
+    $dbC = new databaseController();
+
+    $results = $dbC->PDOStatement(array(
+        'query' => "SELECT * FROM lst_item_state"
+        ));
+
+    $list = array();
+    foreach ( $results as $result ) {
+        if ( $listType == 'select_options' )
+            $list[$result['label']] = $result['id'];
+        else {
             array_push($list, array(
-                    'id'        => $result['id']
-                    ,'label'     => $result['label']
+                    'id'            => $result['id']
+                    ,'label'        => $result['label']
                     ,'description'  => $result['description']
                 ));
         }
-        $GLOBALS['cache']->set('itemState_list', $list, 3600*24);
     }
-    $this->model->data('list', $list);
-} //generateList
+
+    return $list;
+
+} //getList
 
 
 
@@ -49,15 +55,19 @@ public function generateList () {
 
 
 
-
-public function decodeID ($itemID) {
-    $dbC = $this->dbC;
-    $result = $dbC->PDOStatement(array(
+public function idToLabel ($id) {
+    $dbC = new databaseController();
+    $results = $dbC->PDOStatement(array(
         'query' => "SELECT label FROM lst_item_state WHERE id = ?"
-        ,'values'   => array(array('int', $itemID))
+        ,'values'   => array(intval($id))
         ));
-    return $result[0]['label'];
-} //decodeID
+    return count($results) > 0
+        ? $results[0]['label']
+        : '';
+} //idToLabel
+
+
+
 
 
 

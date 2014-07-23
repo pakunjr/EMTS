@@ -10,6 +10,12 @@
 
     <script type="text/javascript" src="<?php echo URL_BASE,'plugins/jquery/jquery-1.11.0.min.js'; ?>"></script>
     <script type="text/javascript" src="<?php echo URL_BASE,'plugins/jquery/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js'; ?>"></script>
+    <script type="text/javascript">
+        var URLBase = '<?php echo URL_BASE; ?>'
+            ,URLTemplate = '<?php echo URL_TEMPLATE; ?>';
+    </script>
+    <script type="text/javascript" src="<?php echo URL_BASE,'plugins/jquery/jquery.alphanumeric.js'; ?>"></script>
+    <script type="text/javascript" src="<?php echo URL_TEMPLATE,'js/script.js'; ?>"></script>
 
 </head><body>
 

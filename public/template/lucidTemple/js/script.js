@@ -18,6 +18,14 @@ var navigationMenu = function () {
 
 
 
+
+
+
+
+
+
+
+
 /**
  * A container for jQuery UIs
  */
@@ -43,200 +51,86 @@ var jQueryUIFx = function () {
 
 
 
-/**
- * Notes
- */
-var instructionalNotes = function () {
-    if ( $('.note').length < 1 ) return false;
 
 
-    $('.note').each(function () {
-
-        var $this = $(this)
-            ,attrDataFor = $this.attr('data-for')
-            ,thisContent = $this.html()
-            ,$master = null;
 
 
-        if ( $this.siblings('#'+attrDataFor).length > 0 )
-            $master = $this.siblings('#'+attrDataFor);
-        else if ( $this.siblings('.'+attrDataFor).length > 0 )
-            $master = $this.siblings('.'+attrDataFor);
-
-
-        if ( $master != null ) {
-            var duplicatedNote = '<div class="note" data-for="'+attrDataFor+'">'
-                +'<span class="icon-note"></span>'
-                +'<div class="note-content hidden">'
-                +'<div class="note-title">Guideline/s:</div>'
-                +thisContent
-                +'<div class="note-close">Click to close</div>'
-                +'</div>'
-                +'</div>';
-
-            $master.after(duplicatedNote);
-            $this.remove();
-
-            var $this = $master.next('.note')
-                ,$noteIcon = $this.find('.icon-note')
-                ,$noteContent = $this.find('.note-content');
-
-            $noteIcon.click(function () {
-                if ( $noteContent.hasClass('hidden') )
-                    $noteContent.removeClass('hidden');
-            });
-
-            $noteContent.css({
-                'margin-left': 0 - $noteContent.width() + 'px'
-            }).click(function () {
-                if ( !$noteContent.hasClass('hidden') )
-                    $noteContent.addClass('hidden');
-            });
-        } else {
-            $this.remove();
-        }
-
-    });
-}; //instructionalNotes
 
 
 
 
 
 /**
- * Search functions
- */
-var searchFunctions = function () {
-    if ( $('.search-results').length < 1 ) return false;
-
-    $('.search-results').each(function () {
-        /**
-         * dataSearch is the search box for holding
-         * the query
-         *
-         * dataResult is the container of the result
-         * the unique identifier of the picked result
-         */
-        var $this = $(this)
-            ,dataSearch = $this.attr('data-search')
-            ,dataURL = $this.attr('data-url')
-            ,dataResult = $this.attr('data-result')
-            ,$searchBox = $this.siblings('#'+dataSearch)
-            ,$result = $this.siblings('#'+dataResult);
-
-        /**
-         * Delay to detect if the user has stopped
-         * or finished typing the search query
-         */
-        var typingTimer = null
-            ,typingInterval = 500;
-
-        if ( $searchBox.val() != '' && $result.val() != '' ) {
-            searchCancelButton($searchBox, $result);
-            $searchBox.prop('disabled', true);
-        }
-
-        $searchBox.on('keyup focus click', function (e) {
-            /**
-             * Clear search box if `esc` key was pressed
-             */
-            var pressedKey = e.keyCode || e.which;
-            if ( pressedKey == 27 ) {
-                $searchBox.val('');
-                $result.val('');
-            }
-
-            $this.css({
-                'left': $searchBox.offset().left + 'px'
-            });
-
-
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(function () {
-
-                var searchQuery = $searchBox.val()
-                    ,forURL = searchQuery.replace(/[^a-z0-9\s]/gi, '');
-
-                if ( searchQuery.length > 0 ) {
-                    $this.load(dataURL+forURL, function () {
-
-                        if ( $this.find('.search-data').length > 0 ) {
-                            $this.find('.search-data').each(function () {
-
-
-                                var $dataThis = $(this)
-                                    ,dataIdentifier = $dataThis.find('.search-result-identifier').val()
-                                    ,dataLabel = $dataThis.find('.search-result-label').html();
-
-                                dataHighlighter($dataThis);
-                                $dataThis.click(function () {
-                                    $result.val(dataIdentifier);
-                                    $searchBox.prop('disabled', true)
-                                        .val(dataLabel)
-                                        .trigger('change');
-                                    $this.addClass('hidden');
-                                    searchCancelButton($searchBox, $result);
-                                });
-
-                            });
-
-                            $this.removeClass('hidden');
-                        }
-
-                    });
-                } else $this.addClass('hidden');
-
-
-                $searchBox.focusout(function () {
-                    if ( $this.is(':hover') ) {
-                        $this.mouseleave(function () {
-                            $this.addClass('hidden');
-                        });
-                    } else $this.addClass('hidden');
-                });
-
-            }, typingInterval); //setTimeout - typingTimer
-        });
-    });
-}; //searchFunctions
-
-var searchCancelButton = function ($searchBox, $result) {
-    if ( $searchBox.next('.search-result-cancel').length < 1 ) {
-
-        $searchBox.after('<img class="search-result-cancel search-result-cancel-icon" />');
-        var $cancelButton = $searchBox.next('.search-result-cancel');
-        $cancelButton.css({
-            'margin-top': (0 - $cancelButton.height() / 2) + 5 + 'px'
-            ,'left': ($searchBox.offset().left - ($cancelButton.width() / 2)) + 5 + 'px'
-        }).click(function () {
-            $result.val('');
-            $searchBox.val('')
-                .trigger('change')
-                .prop('disabled', false);
-            $cancelButton.remove();
-        });
-
-    }
-}; //searchCancelButton
-
-
-
-
-
-/**
- * Numeric boxes
+ * Numeric and decimal boxes
  */
 var numerics = function () {
-    if ( $('.numeric').length < 1 ) return false;
 
-    $('.numeric').keyup(function () {
-        var $this = $(this)
-            ,thisVal = $this.val();
+    if ( $('.numeric').length > 0 )
+        $('.numeric').numeric();
 
-        if ( thisVal != parseFloat(thisVal) )
-            $this.val(parseFloat(thisVal));
-    });
+    if ( $('.decimal').length > 0 )
+        $('.decimal').numeric({allow: '.'});
+
 }; //numerics
+
+
+
+
+
+
+
+
+
+
+/**
+ *
+ */
+var minimapper = function () {
+    $('input[type="text"], textarea, select').each(function () {
+        var $this = $(this)
+            ,thisID = $this.attr('id');
+
+        if ( !$this.hasClass('datepicker') ) {
+
+            var magnifierHTML = '<div class="minimap hidden" data-for="'+thisID+'"></div>';
+            $this.after(magnifierHTML);
+
+            var $minimap = $this.siblings('.minimap[data-for="'+thisID+'"]');
+
+            $minimap.css({
+                'left': $this.offset().left + 'px'
+            });
+
+            $this.on('mouseover click focus keyup change'
+                , function () {
+
+                var content = $this.is('select')
+                    ? $this
+                        .find('option[value="'+$this.val()+'"]')
+                        .html()
+                    : nl2br($this.val());
+
+                if ( $.trim($this.val()) != '' )
+                    $minimap.html(content).removeClass('hidden');
+            }).on('focusout mouseout', function () {
+                $minimap.addClass('hidden');
+            });
+
+        }
+    });
+}; //minimapper
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -247,17 +141,15 @@ var numerics = function () {
 $(document).ready(function () {
     navigationMenu();
     jQueryUIFx();
-    instructionalNotes();
-    searchFunctions();
     numerics();
+    minimapper();
+
+    $('label').addClass('unhighlightable unselectable');
 }); //ready
 
 
-/**
- * ====================================================================
- * End initializer functions
- * ====================================================================
- */
+
+
 
 
 
@@ -433,9 +325,6 @@ var popAlert = function ( alertType, alertOptions ) {
 
 }; //popAlert
 
-
-
-
 var popAlertClose = function () {
     if ( $('.popup-alert-container').length < 1 ) return false;
 
@@ -454,17 +343,268 @@ var popAlertClose = function () {
 
 
 
-/**
- * Highlighter
- */
-var dataHighlighter = function ($data) {
-    $data.hover(function () {
-        $data.addClass('highlighted');
+
+
+
+
+
+
+
+
+
+
+function nl2br(str, is_xhtml) {
+
+  var breakTag = (is_xhtml || typeof is_xhtml === 'undefined')
+        ? '<br ' + '/>'
+        : '<br>'
+    ,breakTag = '<br />';
+
+  return (str + '')
+    .replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(function($) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$.fn.dataHighlight = function () {
+    var $this = $(this);
+    $this.hover(function () {
+        $this.addClass('highlighted');
     }, function () {
-        $data.removeClass('highlighted');
+        $this.removeClass('highlighted');
     });
-}; //dataHighlighter
+
+    return this;
+}; //dataHighlight
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+$.fn.formSearch = function (userOptions) {
+    var $this = $(this)
+        ,thisID = $this.attr('id')
+        ,typingTimer = null
+        ,query = null;
+
+    var options = $.extend({
+        'holder': ''
+        ,'url': ''
+    }, userOptions);
+
+    if ( $this.siblings('.search-results[data-for="'+thisID+'"]').length < 1 ) {
+        var srHTML = '<div '
+                +'class="search-results hidden" '
+                +'data-for="'+thisID+'"'
+            +'>'
+            +'</div>';
+        $this.after(srHTML);
+    }
+    var $resultsHolder = $('.search-results[data-for="'+thisID+'"]');
+
+    if ( options['holder'].val() != '' )
+        $this.prop('readonly', true).formSearchCanceller(options['holder']);
+
+    $this.on('keyup focus click', function () {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(function () {
+            query = $this.val().replace(/[^a-z0-9\s]/gi, '');
+
+            if ( query.length > 0 && options['holder'].val() == '' ) {
+                $resultsHolder.load(options['url']+query, function () {
+                    $resultsHolder.removeClass('hidden');
+
+                    if ( $('.search-data').length > 0 ) {
+
+                        $resultsHolder.append('<hr /><input class="btn-red cancel-search" type="button" value="Cancel" />');
+
+
+                        $('.search-data').each(function () {
+                            var $sd = $(this)
+                                ,primeData = $sd
+                                    .find('.prime-data')
+                                    .val()
+                                ,primeLabel = $sd
+                                    .find('.prime-label')
+                                    .html();
+
+                            $sd.dataHighlight().click(function () {
+                                $this.prop('readonly', true)
+                                    .val(primeLabel)
+                                    .formSearchCanceller(options['holder']);
+
+                                options['holder'].val(primeData);
+                                $resultsHolder.addClass('hidden');
+                            });
+                        });
+
+                    } else $resultsHolder.html('Sorry, no match have been found.<hr /><input class="cancel-search" type="button" value="Ok" />');
+
+                    var $cancelBtn = $resultsHolder.find('.cancel-search');
+                    $cancelBtn.click(function () {
+                        $resultsHolder.addClass('hidden');
+                    });
+                });
+            } else $resultsHolder.addClass('hidden');
+        }, 750);
+    });
+
+    return this;
+}; //formSearch
+
+
+$.fn.formSearchCanceller = function (holder) {
+    var $this = $(this)
+        ,thisID = $this.attr('id');
+
+    var cHTML = '<img class="search-result-cancel-btn" src="'+URLBase+'public/img/blank.png" data-for="'+thisID+'" />';
+
+    if ( $this.siblings('.search-result-cancel-btn[data-for="'+thisID+'"]').length < 1 )
+        $this.after(cHTML);
+
+    var $cancelBtn = $('.search-result-cancel-btn[data-for="'+thisID+'"]');
+
+    $cancelBtn.click(function () {
+        holder.val('');
+        $this.val('').prop('readonly', false);
+        $cancelBtn.remove()
+    });
+
+    return this;
+}; //formSearchCanceller
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$.fn.formNote = function (userOptions) {
+    var $this = $(this)
+        ,thisID = $this.attr('id');
+
+    var options = $.extend({
+        'content': 'No content provided.'
+    }, userOptions);
+
+    var fnHTML = '<img class="note-trigger" src="'+URLBase+'public/img/blank.png" data-for="'+thisID+'" />'
+        +'<div class="note hidden" data-for="'+thisID+'">'
+        +'<span style="color: #053;">Developer\'s Note</span><hr />'
+        +options['content']
+        +'<hr />'
+        +'<input class="note-close-btn" type="button" value="Close Note" />'
+        +'</div>';
+
+    if ( $this.siblings('.note[data-for="'+thisID+'"]').length < 1 )
+        $this.after(fnHTML);
+
+    var $note = $('.note[data-for="'+thisID+'"]')
+        ,$noteCloseBtn = $note.find('.note-close-btn')
+        ,$noteTrigger = $note.siblings('.note-trigger[data-for="'+thisID+'"]');
+
+    $note.css({
+        'top': $this.offset().top + 'px'
+        ,'left': $this.offset().left + 'px'
+    });
+
+    $noteTrigger.click(function () {
+        if ( !$note.is(':visible') || $note.hasClass('hidden') ) {
+            $note.removeClass('hidden').css({
+                'top': $this.offset().top + 'px'
+                ,'left': $this.offset().left + 'px'
+            });;
+            $noteTrigger.addClass('hidden');
+        }
+    });
+
+    $noteCloseBtn.click(function () {
+        if ( $note.is(':visible') || !$note.hasClass('hidden') ) {
+            $note.addClass('hidden');
+            $noteTrigger.removeClass('hidden');
+        }
+    });
+
+    return this;
+}; //formNote
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+})(jQuery);
 

@@ -144,9 +144,14 @@ class form {
 
 
     public function radio ($o=array()) {
-        $e = array('placeholder');
+        $e = array('placeholder', 'checked');
+
+        $checkAttr = isset($o['checked']) && $o['checked']
+            ? ' checked="checked"'
+            : '';
+
         $output = $this->renderLabel($o)
-                .'<input type="radio"'.$this->parseAttributes($o, $e).' />'
+                .'<input type="radio"'.$checkAttr.$this->parseAttributes($o, $e).' />'
                 .$this->autoLineBreak($o);
         return $output;
     } //radio
@@ -157,16 +162,25 @@ class form {
     public function checkbox ($o=array()) {
         $e = array('placeholder', 'checked');
 
-        $checkAttr = '';
-        if ( isset($o['checked']) ) {
-            if ( $o['checked'] ) $checkAttr = ' checked="checked"';
-        }
+        $checkAttr = isset($o['checked']) && $o['checked']
+            ? ' checked="checked"'
+            : '';
 
         $output = $this->renderLabel($o)
             .'<input type="checkbox"'.$checkAttr.$this->parseAttributes($o, $e).' />'
             .$this->autoLineBreak($o);
         return $output;
     } //checkbox
+
+
+
+
+    public function file ($o=array()) {
+        $output = $this->renderLabel($o)
+            .'<input type="file"'.$this->parseAttributes($o).' />'
+            .$this->autoLineBreak($o);
+        return $output;
+    } //file
 
 
 

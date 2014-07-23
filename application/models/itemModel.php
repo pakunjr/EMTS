@@ -6,29 +6,11 @@ private $itemID;
 private $itemExists;
 private $itemArchiveStatus;
 
-private $itemSerialNo;
-private $itemModelNo;
-private $itemName;
-private $itemType;
-private $itemState;
-private $itemDescription;
-private $itemDateOfPurchase;
-private $itemQuantity;
-private $itemQuantityUnit;
-
-
-
-private $packageID;
-private $packageName;
-private $packageSerialNo;
-private $packageDescription;
-private $packageDateOfPurchase;
-
 /**
- * Ownership list / history
+ * Single item information used for the update
+ * form of an item
  */
-private $ownershipList;
-private $currentOwner;
+private $itemInformation;
 
 
 /**
@@ -42,6 +24,12 @@ private $itemList;
  * Item search
  */
 private $itemSearch;
+
+
+/**
+ * Form variables
+ */
+private $formVariables;
 
 
 
